@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import UserHome from './pages/UserHome';
 import MyQR from './pages/MyQR';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+import AdminActivities from './pages/AdminActivities';
 import AdminScan from './pages/AdminScan';
 import ProfileCompletion from './pages/ProfileCompletion';
 import { Role, User } from './types';
@@ -23,7 +25,6 @@ const AuthGuard = ({ children, role }: { children: React.ReactNode, role?: Role 
     return <Navigate to="/" />;
   }
 
-  // Profile completion gate for users
   if (user.role === Role.USER && !user.isProfileCompleted && window.location.hash !== '#/complete-profile') {
     return <Navigate to="/complete-profile" />;
   }
@@ -35,11 +36,9 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/complete-profile" element={<ProfileCompletion />} />
 
-        {/* User Routes */}
         <Route 
           path="/home" 
           element={
@@ -57,12 +56,27 @@ const App: React.FC = () => {
           } 
         />
 
-        {/* Admin Routes */}
         <Route 
           path="/admin/dashboard" 
           element={
             <AuthGuard role={Role.ADMIN}>
               <AdminDashboard />
+            </AuthGuard>
+          } 
+        />
+        <Route 
+          path="/admin/users" 
+          element={
+            <AuthGuard role={Role.ADMIN}>
+              <AdminUsers />
+            </AuthGuard>
+          } 
+        />
+        <Route 
+          path="/admin/activities" 
+          element={
+            <AuthGuard role={Role.ADMIN}>
+              <AdminActivities />
             </AuthGuard>
           } 
         />
@@ -74,8 +88,15 @@ const App: React.FC = () => {
             </AuthGuard>
           } 
         />
+        <Route 
+          path="/admin/scan/:activityId" 
+          element={
+            <AuthGuard role={Role.ADMIN}>
+              <AdminScan />
+            </AuthGuard>
+          } 
+        />
 
-        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </HashRouter>

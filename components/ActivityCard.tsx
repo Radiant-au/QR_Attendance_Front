@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, CheckCircle2, XCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Activity, ActivityStatus } from '../types';
 
 interface ActivityCardProps {
@@ -33,6 +33,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
       setCancelReason('');
     }
   };
+
+  const canRegister = activity.status === ActivityStatus.UPCOMING;
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -69,13 +71,18 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
         <div className="flex gap-2">
           {!isRegistered ? (
-            <button
-              disabled={activity.status === ActivityStatus.COMPLETED}
-              onClick={() => onRegister?.(activity.id)}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-semibold py-2.5 rounded-xl transition-colors shadow-sm text-sm"
-            >
-              Register Now
-            </button>
+            canRegister ? (
+              <button
+                onClick={() => onRegister?.(activity.id)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition-colors shadow-sm text-sm"
+              >
+                Register Now
+              </button>
+            ) : (
+              <div className="flex-1 py-2.5 bg-slate-100 text-slate-400 rounded-xl text-center text-sm font-medium border border-slate-200">
+                Registration Closed
+              </div>
+            )
           ) : (
             <div className="w-full flex flex-col gap-2">
               <div className="flex items-center justify-center gap-2 py-2 px-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium">
@@ -133,7 +140,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   );
 };
 
-// Helper component for Users icon
 const Users = ({ size, className }: { size?: number; className?: string }) => (
   <svg 
     width={size || 24} 
