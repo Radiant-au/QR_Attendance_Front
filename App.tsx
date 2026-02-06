@@ -1,0 +1,85 @@
+
+import React from 'react';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import UserHome from './pages/UserHome';
+import MyQR from './pages/MyQR';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminScan from './pages/AdminScan';
+import ProfileCompletion from './pages/ProfileCompletion';
+import { Role, User } from './types';
+import { STORAGE_KEYS } from './constants';
+
+const AuthGuard = ({ children, role }: { children: React.ReactNode, role?: Role }) => {
+  const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+  const userJson = localStorage.getItem(STORAGE_KEYS.USER);
+  const user: User | null = userJson ? JSON.parse(userJson) : null;
+
+  if (!token || !user) {
+    return <Navigate to="/" />;
+  }
+
+  if (role && user.role !== role) {
+    return <Navigate to="/" />;
+  }
+
+  // Profile completion gate for users
+  if (user.role === Role.USER && !user.isProfileCompleted && window.location.hash !== '#/complete-profile') {
+    return <Navigate to="/complete-profile" />;
+  }
+
+  return <>{children}</>;
+};
+
+const App: React.FC = () => {
+  return (
+    <HashRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Login />} />
+        <Route path="/complete-profile" element={<ProfileCompletion />} />
+
+        {/* User Routes */}
+        <Route 
+          path="/home" 
+          element={
+            <AuthGuard role={Role.USER}>
+              <UserHome />
+            </AuthGuard>
+          } 
+        />
+        <Route 
+          path="/qr" 
+          element={
+            <AuthGuard role={Role.USER}>
+              <MyQR />
+            </AuthGuard>
+          } 
+        />
+
+        {/* Admin Routes */}
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <AuthGuard role={Role.ADMIN}>
+              <AdminDashboard />
+            </AuthGuard>
+          } 
+        />
+        <Route 
+          path="/admin/scan" 
+          element={
+            <AuthGuard role={Role.ADMIN}>
+              <AdminScan />
+            </AuthGuard>
+          } 
+        />
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </HashRouter>
+  );
+};
+
+export default App;
