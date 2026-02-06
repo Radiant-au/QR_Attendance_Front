@@ -87,7 +87,7 @@ const Login: React.FC = () => {
                   type="email"
                   required
                   placeholder="name@university.edu"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
+                  className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm shadow-sm"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -102,7 +102,7 @@ const Login: React.FC = () => {
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
+                  className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm shadow-sm"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -132,7 +132,7 @@ const Login: React.FC = () => {
           </form>
         </div>
         
-        {/* Footer Link (Admin hidden route hint) */}
+        {/* Footer Link */}
         <p className="text-center mt-8 text-xs text-slate-400 font-medium">
           © 2024 University Tech Club. Secure Access Only.
         </p>

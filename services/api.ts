@@ -18,8 +18,9 @@ const initDB = () => {
   }
   if (!localStorage.getItem(DB_KEYS.ACTIVITIES)) {
     localStorage.setItem(DB_KEYS.ACTIVITIES, JSON.stringify([
-      { id: '1', title: 'Python Workshop', description: 'Deep dive into Python.', date: '2024-05-20', time: '14:00', location: 'Hall A', status: ActivityStatus.UPCOMING, registeredCount: 45 },
-      { id: '2', title: 'Hackathon 2024', description: '24-hour coding.', date: '2024-06-15', time: '09:00', location: 'Main Lab', status: ActivityStatus.ONGOING, registeredCount: 120 }
+      { id: '1', title: 'Python Workshop', description: 'Deep dive into Python for data science and web development.', date: '2024-05-20', time: '14:00', location: 'Hall A, Floor 2', status: ActivityStatus.UPCOMING, registeredCount: 45 },
+      { id: '2', title: 'Hackathon 2024', description: 'Our annual 24-hour coding competition with great prizes.', date: '2024-06-15', time: '09:00', location: 'Main Computing Lab', status: ActivityStatus.ONGOING, registeredCount: 120 },
+      { id: '3', title: 'UI/UX Design Session', description: 'Learning Figma and responsive design principles.', date: '2024-05-18', time: '10:00', location: 'Room 302', status: ActivityStatus.REGISTRATION_CLOSED, registeredCount: 32 }
     ]));
   }
 };
@@ -75,6 +76,7 @@ export const userApi = {
   updateProfile: async (id: string, data: Partial<User>): Promise<User> => {
     const users = getFromDB<User>(DB_KEYS.USERS);
     const index = users.findIndex(u => u.id === id);
+    if (index === -1) throw new Error('User not found');
     users[index] = { ...users[index], ...data, isProfileCompleted: true };
     saveToDB(DB_KEYS.USERS, users);
     return users[index];
@@ -96,6 +98,7 @@ export const activityApi = {
   updateActivity: async (id: string, data: Partial<Activity>): Promise<Activity> => {
     const activities = getFromDB<Activity>(DB_KEYS.ACTIVITIES);
     const index = activities.findIndex(a => a.id === id);
+    if (index === -1) throw new Error('Activity not found');
     activities[index] = { ...activities[index], ...data };
     saveToDB(DB_KEYS.ACTIVITIES, activities);
     return activities[index];
@@ -124,6 +127,7 @@ export const registrationApi = {
     }
   },
   cancel: async (activityId: string, reason: string): Promise<void> => {
+    console.log(`Submitting leave for ${activityId} with reason: ${reason}`);
     const activities = getFromDB<Activity>(DB_KEYS.ACTIVITIES);
     const index = activities.findIndex(a => a.id === activityId);
     if (index !== -1) {

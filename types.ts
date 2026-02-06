@@ -6,6 +6,7 @@ export enum Role {
 
 export enum ActivityStatus {
   UPCOMING = 'Upcoming',
+  REGISTRATION_CLOSED = 'Registration Closed',
   ONGOING = 'Ongoing',
   COMPLETED = 'Completed'
 }
