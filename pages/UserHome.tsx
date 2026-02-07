@@ -28,7 +28,6 @@ const UserHome: React.FC = () => {
     try {
       await registrationApi.register(id);
       setRegisteredIds(prev => new Set([...Array.from(prev), id]));
-      // In a real app, update activity count from server
       setActivities(prev => prev.map(a => a.id === id ? { ...a, registeredCount: a.registeredCount + 1 } : a));
     } catch (error) {
       alert('Failed to register.');
@@ -38,33 +37,28 @@ const UserHome: React.FC = () => {
   const handleCancel = async (id: string, reason: string) => {
     try {
       await registrationApi.cancel(id, reason);
-      setRegisteredIds(prev => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-      setActivities(prev => prev.map(a => a.id === id ? { ...a, registeredCount: a.registeredCount - 1 } : a));
+      // Logic for cancellation if needed, but here we just update UI state for the card
     } catch (error) {
-      alert('Failed to cancel registration.');
+      alert('Failed to submit leave.');
     }
   };
 
   return (
     <Layout role={Role.USER}>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <header>
-          <h2 className="text-2xl font-bold text-slate-900">Explore Activities</h2>
-          <p className="text-slate-500 text-sm">Find and join upcoming tech events.</p>
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Active Events</h2>
+          <p className="text-slate-500 text-sm font-medium italic">Join a session and grow your tech skills.</p>
         </header>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-[280px] bg-slate-200 animate-pulse rounded-2xl" />
+              <div key={i} className="h-[300px] bg-slate-200 animate-pulse rounded-[2rem]" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
             {activities.map(activity => (
               <ActivityCard 
                 key={activity.id} 
@@ -78,8 +72,8 @@ const UserHome: React.FC = () => {
         )}
         
         {activities.length === 0 && !isLoading && (
-          <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
-            <p className="text-slate-400 font-medium">No activities available at the moment.</p>
+          <div className="text-center py-32 bg-white rounded-[3rem] border-4 border-dashed border-slate-100">
+            <p className="text-slate-400 font-black uppercase tracking-widest">No activities detected in radar.</p>
           </div>
         )}
       </div>

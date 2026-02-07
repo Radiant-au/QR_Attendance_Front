@@ -12,7 +12,8 @@ import ProfileCompletion from './pages/ProfileCompletion';
 import { Role, User } from './types';
 import { STORAGE_KEYS } from './constants';
 
-const AuthGuard = ({ children, role }: { children: React.ReactNode, role?: Role }) => {
+// Fix: Changed children to optional in the type definition to resolve TS missing property errors when wrapping content
+const AuthGuard = ({ children, role }: { children?: React.ReactNode, role?: Role }) => {
   const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
   const userJson = localStorage.getItem(STORAGE_KEYS.USER);
   const user: User | null = userJson ? JSON.parse(userJson) : null;

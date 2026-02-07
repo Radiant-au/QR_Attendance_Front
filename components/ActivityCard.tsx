@@ -41,26 +41,24 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   const isClosed = activity.status === ActivityStatus.REGISTRATION_CLOSED;
   const canRegister = activity.status === ActivityStatus.UPCOMING;
   
-  // Allow leave request if registration is closed or ongoing, and user hasn't already requested it.
   const canSubmitLeave = (isClosed || isOngoing) && !leaveRequested;
 
   return (
-    <div className={`group relative bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 ${isOngoing ? 'ring-2 ring-green-500 ring-offset-2' : ''}`}>
-      {/* Accent strip */}
+    <div className={`group relative bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 w-full ${isOngoing ? 'ring-2 ring-green-500 ring-offset-2' : ''}`}>
       <div className={`h-2 w-full ${isOngoing ? 'bg-green-500' : isClosed ? 'bg-amber-500' : 'bg-blue-500'}`}></div>
       
-      <div className="p-6">
+      <div className="p-5 md:p-6">
         <div className="flex justify-between items-start mb-4">
           <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border tracking-widest ${statusColors[activity.status]}`}>
             {activity.status}
           </span>
           <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
             <Users size={14} className="text-slate-300" />
-            {activity.registeredCount} Joined
+            {activity.registeredCount} <span className="hidden sm:inline">Joined</span>
           </div>
         </div>
 
-        <h3 className="text-xl font-bold text-slate-900 mb-2 leading-tight group-hover:text-blue-600 transition-colors">
+        <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-2 leading-tight group-hover:text-blue-600 transition-colors">
           {activity.title}
         </h3>
         <p className="text-slate-500 text-sm line-clamp-2 mb-6 leading-relaxed">
@@ -69,19 +67,19 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 bg-slate-50 p-4 rounded-2xl">
           <div className="flex items-center gap-3 text-slate-600 text-sm">
-            <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500">
+            <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500 shrink-0">
               <Calendar size={16} />
             </div>
-            <span className="font-medium">{activity.date}</span>
+            <span className="font-medium truncate">{activity.date}</span>
           </div>
           <div className="flex items-center gap-3 text-slate-600 text-sm">
-            <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500">
+            <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500 shrink-0">
               <Clock size={16} />
             </div>
-            <span className="font-medium">{activity.time}</span>
+            <span className="font-medium truncate">{activity.time}</span>
           </div>
           <div className="flex items-center gap-3 text-slate-600 text-sm sm:col-span-2">
-            <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500">
+            <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500 shrink-0">
               <MapPin size={16} />
             </div>
             <span className="font-medium truncate">{activity.location}</span>
@@ -96,8 +94,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
             </div>
           ) : (
             <>
-              {/* Registration Status for unregistered users */}
-              {!isRegistered && (
+              {!isRegistered ? (
                 <>
                   {canRegister ? (
                     <button
@@ -108,34 +105,30 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                       <ArrowRight size={18} />
                     </button>
                   ) : (
-                    <div className="w-full py-3.5 bg-slate-100 text-slate-400 rounded-2xl text-center text-xs font-black uppercase tracking-widest border border-slate-200 mb-1">
+                    <div className="w-full py-3.5 bg-slate-100 text-slate-400 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest border border-slate-200">
                       Registration Closed
                     </div>
                   )}
                 </>
-              )}
-
-              {/* Attendance Status for registered users */}
-              {isRegistered && (
+              ) : (
                 <div className="w-full space-y-3">
                   <div className="flex items-center justify-center gap-2 py-3.5 px-4 bg-blue-50 border border-blue-200 rounded-2xl text-blue-700 text-sm font-bold">
                     <CheckCircle2 size={18} />
-                    You are Registered
+                    Registered
                   </div>
 
                   {isOngoing && (
-                    <button className="w-full p-4 bg-green-600 text-white rounded-2xl flex flex-col items-center gap-1 shadow-xl shadow-green-200 hover:bg-green-700 transition-all group/btn">
+                    <button className="w-full p-4 bg-green-600 text-white rounded-2xl flex flex-col items-center gap-1 shadow-xl shadow-green-200 hover:bg-green-700 transition-all animate-pulse">
                       <p className="text-[10px] font-black uppercase tracking-widest text-green-100">Live Attendance</p>
                       <p className="text-sm font-bold flex items-center gap-2">
-                        Check-in at Club Now
-                        <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                        Check-in at Club
+                        <ArrowRight size={16} />
                       </p>
                     </button>
                   )}
                 </div>
               )}
 
-              {/* ALWAYS SHOW LEAVE BUTTON IF CLOSED/ONGOING (FOR EVERYONE) */}
               {canSubmitLeave && (
                 <button
                   onClick={() => setShowCancelDialog(true)}
@@ -152,13 +145,13 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
       {showCancelDialog && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
-            <div className="w-16 h-16 bg-red-50 text-red-600 rounded-3xl flex items-center justify-center mb-6">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-md p-6 md:p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-red-50 text-red-600 rounded-3xl flex items-center justify-center mb-6">
                <Info size={32} />
             </div>
-            <h2 className="text-2xl font-black text-slate-900 mb-2">Request Absence</h2>
+            <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-2">Request Absence</h2>
             <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-              Please provide a valid reason for missing <span className="font-bold text-slate-800">"{activity.title}"</span>. This will be reviewed by administrators.
+              Please provide a valid reason for missing <span className="font-bold text-slate-800">"{activity.title}"</span>.
             </p>
             <form onSubmit={handleCancelSubmit}>
               <div className="mb-6">
@@ -166,8 +159,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                 <textarea
                   required
                   autoFocus
-                  className="w-full border-2 border-slate-100 bg-white rounded-2xl p-4 text-sm focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all min-h-[140px]"
-                  placeholder="Explain why you cannot attend (e.g., medical leave, exam conflict)..."
+                  className="w-full border-2 border-slate-100 bg-white rounded-2xl p-4 text-sm focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all min-h-[120px]"
+                  placeholder="Explain why you cannot attend..."
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                 />
@@ -176,15 +169,15 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCancelDialog(false)}
-                  className="flex-1 py-4 rounded-2xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-colors"
+                  className="flex-1 py-4 rounded-2xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-colors order-2 sm:order-1"
                 >
-                  Go Back
+                  Back
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-200"
+                  className="flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-200 order-1 sm:order-2"
                 >
-                  Confirm Absence
+                  Confirm
                 </button>
               </div>
             </form>
