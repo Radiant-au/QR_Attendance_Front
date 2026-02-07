@@ -1,11 +1,11 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, CheckCircle2 } from 'lucide-react';
 import { getActivity } from '../../activities/api/activities';
 import { Activity } from '../../../types';
 
-export const AdminScan: React.FC = () => {
+export const AdminScan = () => {
   const { activityId } = useParams<{ activityId: string }>();
   const [activity, setActivity] = useState<Activity | null>(null);
   const [lastScanned, setLastScanned] = useState<{ name: string; time: string } | null>(null);
@@ -21,7 +21,7 @@ export const AdminScan: React.FC = () => {
   }, [activityId]);
 
   const simulateScan = () => {
-    setLastScanned({ name: `Student #${Math.floor(Math.random()*9000)+1000}`, time: new Date().toLocaleTimeString() });
+    setLastScanned({ name: `Student #${Math.floor(Math.random() * 9000) + 1000}`, time: new Date().toLocaleTimeString() });
     setTimeout(() => setLastScanned(null), 3000);
   };
 
@@ -39,19 +39,19 @@ export const AdminScan: React.FC = () => {
         <div className="w-full max-w-[400px] aspect-square relative rounded-[3rem] overflow-hidden bg-slate-800 border-4 border-slate-700">
           <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover grayscale contrast-125" />
           <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-64 h-64 border-2 border-blue-500 rounded-3xl relative">
-                <div className="w-full h-0.5 bg-blue-500 animate-[scan_2s_infinite]"></div>
-             </div>
+            <div className="w-64 h-64 border-2 border-blue-500 rounded-3xl relative">
+              <div className="w-full h-0.5 bg-blue-500 animate-[scan_2s_infinite]"></div>
+            </div>
           </div>
         </div>
       </div>
       <div className="p-8">
-         {lastScanned ? (
-           <div className="bg-green-500 rounded-2xl p-4 flex items-center gap-4 animate-in slide-in-from-bottom">
-              <CheckCircle2 size={28} />
-              <div><p className="text-xs font-bold">Verified</p><p className="font-bold">{lastScanned.name}</p></div>
-           </div>
-         ) : <button onClick={simulateScan} className="w-full py-3 bg-slate-800 rounded-full text-xs font-bold uppercase">Test Scan</button>}
+        {lastScanned ? (
+          <div className="bg-green-500 rounded-2xl p-4 flex items-center gap-4 animate-in slide-in-from-bottom">
+            <CheckCircle2 size={28} />
+            <div><p className="text-xs font-bold">Verified</p><p className="font-bold">{lastScanned.name}</p></div>
+          </div>
+        ) : <button onClick={simulateScan} className="w-full py-3 bg-slate-800 rounded-full text-xs font-bold uppercase">Test Scan</button>}
       </div>
       <style>{`@keyframes scan { 0% { transform: translateY(-32px); } 100% { transform: translateY(32px); } }`}</style>
     </div>

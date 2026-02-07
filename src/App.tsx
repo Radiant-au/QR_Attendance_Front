@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import { useEffect, type FC, type ReactNode } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 
@@ -17,7 +17,7 @@ import { AdminUsers } from './features/users/components/AdminUsers';
 import { AdminActivities } from './features/activities/components/AdminActivities';
 import { AdminScan } from './features/attendance/components/AdminScan';
 
-const AuthGuard = ({ children, role }: { children?: React.ReactNode, role?: Role }) => {
+const AuthGuard = ({ children, role }: { children?: ReactNode, role?: Role }) => {
   const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
   const userJson = localStorage.getItem(STORAGE_KEYS.USER);
   const user: User | null = userJson ? JSON.parse(userJson) : null;
@@ -42,7 +42,7 @@ const LoginPage = () => {
           <h1 className="text-3xl font-extrabold text-slate-900">Technologia</h1>
           <p className="text-slate-500 mt-2">QR Attendance System</p>
         </div>
-        <LoginForm onSuccess={(isAdmin) => {
+        <LoginForm onSuccess={(isAdmin: boolean) => {
           if (isAdmin) navigate('/admin/dashboard');
           else navigate('/home');
         }} />
@@ -51,7 +51,7 @@ const LoginPage = () => {
   );
 };
 
-const App: React.FC = () => {
+const App: FC = () => {
   useEffect(() => { initDB(); }, []);
 
   return (

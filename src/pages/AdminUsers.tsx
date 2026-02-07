@@ -46,7 +46,7 @@ const AdminUsers: React.FC = () => {
             <h2 className="text-2xl font-bold text-slate-900">User Management</h2>
             <p className="text-slate-500 text-sm">Manage club members and administrators.</p>
           </div>
-          <button 
+          <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 transition-all"
           >
@@ -76,14 +76,13 @@ const AdminUsers: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-slate-600">{user.email}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                      user.role === Role.ADMIN ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${user.role === Role.ADMIN ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                      }`}>
                       {user.role}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button 
+                    <button
                       onClick={() => handleDeleteUser(user.id)}
                       className="text-slate-300 hover:text-red-600 transition-colors"
                     >
@@ -104,9 +103,9 @@ const AdminUsers: React.FC = () => {
             <form onSubmit={handleAddUser} className="space-y-4">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">Email Address</label>
-                <input 
-                  type="email" 
-                  required 
+                <input
+                  type="email"
+                  required
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
@@ -114,7 +113,7 @@ const AdminUsers: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">System Role</label>
-                <select 
+                <select
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500"
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value as Role)}
@@ -124,15 +123,15 @@ const AdminUsers: React.FC = () => {
                 </select>
               </div>
               <div className="flex gap-3 pt-2">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowAddModal(false)}
                   className="flex-1 py-3 border border-slate-200 rounded-xl font-bold text-slate-600"
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700"
                 >
                   Create User

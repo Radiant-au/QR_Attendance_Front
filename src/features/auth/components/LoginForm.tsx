@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Mail, Lock, ArrowRight, ShieldCheck, User as UserIcon } from 'lucide-react';
 import { loginUser, loginAdmin } from '../api/auth';
 import { STORAGE_KEYS } from '../../../config';
@@ -18,13 +18,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = isAdmin 
+      const response = isAdmin
         ? await loginAdmin(email, password)
         : await loginUser(email, password);
-      
+
       localStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(response.user));
-      
+
       onSuccess(isAdmin, response.user.isProfileCompleted);
     } catch (error) {
       alert('Login failed. Please check your credentials.');
@@ -38,18 +38,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       <div className="flex border-b border-slate-100">
         <button
           onClick={() => setIsAdmin(false)}
-          className={`flex-1 py-5 text-sm font-bold transition-all flex items-center justify-center gap-2 ${
-            !isAdmin ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/30' : 'text-slate-400 hover:text-slate-600'
-          }`}
+          className={`flex-1 py-5 text-sm font-bold transition-all flex items-center justify-center gap-2 ${!isAdmin ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/30' : 'text-slate-400 hover:text-slate-600'
+            }`}
         >
           <UserIcon size={18} />
           Student
         </button>
         <button
           onClick={() => setIsAdmin(true)}
-          className={`flex-1 py-5 text-sm font-bold transition-all flex items-center justify-center gap-2 ${
-            isAdmin ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/30' : 'text-slate-400 hover:text-slate-600'
-          }`}
+          className={`flex-1 py-5 text-sm font-bold transition-all flex items-center justify-center gap-2 ${isAdmin ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/30' : 'text-slate-400 hover:text-slate-600'
+            }`}
         >
           <ShieldCheck size={18} />
           Admin

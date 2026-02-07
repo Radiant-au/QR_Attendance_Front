@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MainLayout } from '../../../components/Layout/MainLayout';
 import { getQRUrl } from '../api/attendance';
 import { Role, User } from '../../../types';
@@ -43,17 +43,17 @@ export const MyQR: React.FC = () => {
         <div className="bg-white rounded-[2rem] p-8 shadow-2xl border border-slate-100 flex flex-col items-center">
           {isLoading ? (
             <div className="w-[280px] h-[280px] flex items-center justify-center bg-slate-50 rounded-2xl">
-               <div className="w-10 h-10 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
+              <div className="w-10 h-10 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
             </div>
           ) : qrUrl && (
             <img src={qrUrl} alt="QR" className="w-[280px] h-[280px] rounded-2xl border-4 border-slate-900 p-2" />
           )}
           <div className="mt-8 w-full space-y-4">
-             <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl text-sm font-bold">
-                <span>Refresh in {timeLeft}s</span>
-                <button onClick={refreshQR} className="text-blue-600">Refresh</button>
-             </div>
-             <div className="p-4 bg-blue-50 rounded-2xl text-xs text-blue-800">Unique code for event check-in.</div>
+            <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl text-sm font-bold">
+              <span>Refresh in {timeLeft}s</span>
+              <button onClick={refreshQR} className="text-blue-600">Refresh</button>
+            </div>
+            <div className="p-4 bg-blue-50 rounded-2xl text-xs text-blue-800">Unique code for event check-in.</div>
           </div>
         </div>
       </div>
