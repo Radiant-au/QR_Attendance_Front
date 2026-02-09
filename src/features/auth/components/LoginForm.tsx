@@ -1,8 +1,8 @@
-
-import { useState } from 'react';
-import { Mail, Lock, ArrowRight, ShieldCheck, User as UserIcon } from 'lucide-react';
-import { loginUser, loginAdmin } from '../api/auth';
+import React, { useState } from 'react';
+import { UserIcon as UserIcon, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
+import { authApi } from '../../../services/api';
 import { STORAGE_KEYS } from '../../../config';
+import { toast } from 'sonner';
 
 interface LoginFormProps {
   onSuccess: (isAdmin: boolean, isProfileCompleted: boolean) => void;
@@ -10,7 +10,7 @@ interface LoginFormProps {
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,15 +19,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     setIsLoading(true);
     try {
       const response = isAdmin
-        ? await loginAdmin(email, password)
-        : await loginUser(email, password);
+        ? await authApi.loginAdmin(username, password)
+        : await authApi.loginUser(username, password);
 
       localStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(response.user));
 
-      onSuccess(isAdmin, response.user.isProfileCompleted);
-    } catch (error) {
-      alert('Login failed. Please check your credentials.');
+      // TODO: Since the backend only returns a token, we need an endpoint to fetch user details.
+      // For now, we'll store a placeholder or wait for further integration.
+      // localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(response.user));
+
+      toast.success('Login successful! Welcome back.');
+      // Placeholder: default to true for now to allow entry, or handle appropriately
+      onSuccess(isAdmin, true);
+    } catch (error: any) {
+      toast.error(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -56,15 +61,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
       <form onSubmit={handleSubmit} className="p-8 md:p-10 space-y-6">
         <div>
-          <label className="block text-xs font-black uppercase text-slate-400 tracking-widest mb-2 px-1">Email Address</label>
+          <label className="block text-xs font-black uppercase text-slate-400 tracking-widest mb-2 px-1">Username</label>
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
-              type="email"
+              type="text"
               required
               className="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-slate-100 bg-white focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all text-sm font-medium shadow-sm"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
         </div>

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, CheckCircle2, Info, Users, ArrowRight, XCircle, FileText } from 'lucide-react';
-import { Activity, ActivityStatus } from '../../../types';
+import { type Activity, ActivityStatus } from '../../../types';
 
 interface ActivityCardProps {
   activity: Activity;
@@ -10,17 +10,17 @@ interface ActivityCardProps {
   onCancel?: (id: string, reason: string) => void;
 }
 
-const ActivityCard: React.FC<ActivityCardProps> = ({ 
-  activity, 
-  isRegistered = false, 
-  onRegister, 
-  onCancel 
+const ActivityCard: React.FC<ActivityCardProps> = ({
+  activity,
+  isRegistered = false,
+  onRegister,
+  onCancel
 }) => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [leaveRequested, setLeaveRequested] = useState(false);
 
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     [ActivityStatus.UPCOMING]: 'bg-blue-100 text-blue-700 border-blue-200',
     [ActivityStatus.REGISTRATION_CLOSED]: 'bg-amber-100 text-amber-700 border-amber-200',
     [ActivityStatus.ONGOING]: 'bg-green-100 text-green-700 border-green-200',
@@ -37,22 +37,41 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     }
   };
 
-  const isOngoing = activity.status === ActivityStatus.ONGOING;
-  const isClosed = activity.status === ActivityStatus.REGISTRATION_CLOSED;
-  const canRegister = activity.status === ActivityStatus.UPCOMING;
+  const isOngoing = activity.status === ActivityStatus.ONGOING || activity.status === 'Ongoing';
+  const isClosed = activity.status === ActivityStatus.REGISTRATION_CLOSED || activity.status === 'Registration Closed';
+  const canRegister = activity.status === ActivityStatus.UPCOMING || activity.status === 'Upcoming';
+
   const canSubmitLeave = (isClosed || isOngoing) && !leaveRequested;
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const formatTime = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return '';
+    }
+  };
 
   return (
     <div className={`group relative bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 w-full ${isOngoing ? 'ring-2 ring-green-500 ring-offset-2' : ''}`}>
       <div className={`h-2 w-full ${isOngoing ? 'bg-green-500' : isClosed ? 'bg-amber-500' : 'bg-blue-500'}`}></div>
+
       <div className="p-5 md:p-6">
         <div className="flex justify-between items-start mb-4">
-          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border tracking-widest ${statusColors[activity.status]}`}>
+          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border tracking-widest ${statusColors[activity.status] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
             {activity.status}
           </span>
           <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
             <Users size={14} className="text-slate-300" />
-            {activity.registeredCount} <span className="hidden sm:inline">Joined</span>
+            {/* Registered count missing in backend response for now */}
+            Joiners
           </div>
         </div>
 
@@ -68,13 +87,19 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
             <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500 shrink-0">
               <Calendar size={16} />
             </div>
-            <span className="font-medium truncate">{activity.date}</span>
+            <span className="font-medium truncate">{formatDate(activity.startDateTime)}</span>
           </div>
           <div className="flex items-center gap-3 text-slate-600 text-sm">
             <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500 shrink-0">
               <Clock size={16} />
             </div>
-            <span className="font-medium truncate">{activity.time}</span>
+            <span className="font-medium dynamic">{formatTime(activity.startDateTime)}</span>
+          </div>
+          <div className="flex items-center gap-3 text-slate-600 text-sm sm:col-span-2">
+            <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500 shrink-0">
+              <MapPin size={16} />
+            </div>
+            <span className="font-medium truncate">{activity.location}</span>
           </div>
         </div>
 
@@ -108,6 +133,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                     <CheckCircle2 size={18} />
                     Registered
                   </div>
+
                   {isOngoing && (
                     <button className="w-full p-4 bg-green-600 text-white rounded-2xl flex flex-col items-center gap-1 shadow-xl shadow-green-200 hover:bg-green-700 transition-all animate-pulse">
                       <p className="text-[10px] font-black uppercase tracking-widest text-green-100">Live Attendance</p>
@@ -119,6 +145,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                   )}
                 </div>
               )}
+
               {canSubmitLeave && (
                 <button
                   onClick={() => setShowCancelDialog(true)}
@@ -136,9 +163,16 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
       {showCancelDialog && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] w-full max-w-md p-6 md:p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-red-50 text-red-600 rounded-3xl flex items-center justify-center mb-6">
+              <Info size={32} />
+            </div>
             <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-2">Request Absence</h2>
+            <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+              Please provide a valid reason for missing <span className="font-bold text-slate-800">"{activity.title}"</span>.
+            </p>
             <form onSubmit={handleCancelSubmit}>
               <div className="mb-6">
+                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 px-1">Detailed Reason</label>
                 <textarea
                   required
                   autoFocus
@@ -149,8 +183,19 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                 />
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button type="button" onClick={() => setShowCancelDialog(false)} className="flex-1 py-4 rounded-2xl border border-slate-200 font-bold text-slate-500">Back</button>
-                <button type="submit" className="flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold">Confirm</button>
+                <button
+                  type="button"
+                  onClick={() => setShowCancelDialog(false)}
+                  className="flex-1 py-4 rounded-2xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-colors order-2 sm:order-1"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-200 order-1 sm:order-2"
+                >
+                  Confirm
+                </button>
               </div>
             </form>
           </div>

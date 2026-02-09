@@ -1,7 +1,0 @@
-{
-  "name": "Technologia QR Attendance System",
-  "description": "A high-performance QR-based attendance and activity management system for university tech clubs, featuring role-based dashboards, real-time scanning, and profile management.",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}

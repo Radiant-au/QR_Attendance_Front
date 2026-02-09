@@ -1,58 +1,56 @@
 
-import { Activity, ActivityStatus } from '../../../types';
-import { DB_KEYS } from '../../../config';
-import { getFromDB, saveToDB } from '../../../lib/db';
+import { type Activity, type CreateActivityRequest } from '../../../types';
+import { apiFetch } from '../../../lib/apiClient';
 
-export const getActivities = async (): Promise<Activity[]> => getFromDB<Activity>(DB_KEYS.ACTIVITIES);
-
-export const getActivity = async (id: string): Promise<Activity | undefined> => 
-  getFromDB<Activity>(DB_KEYS.ACTIVITIES).find(a => a.id === id);
-
-export const createActivity = async (data: Partial<Activity>): Promise<Activity> => {
-  const activities = getFromDB<Activity>(DB_KEYS.ACTIVITIES);
-  const newAct = { ...data, id: Math.random().toString(36).substr(2, 9), registeredCount: 0 } as Activity;
-  saveToDB(DB_KEYS.ACTIVITIES, [...activities, newAct]);
-  return newAct;
+export const getActivities = async (isAdmin: boolean = false): Promise<Activity[]> => {
+  const path = isAdmin ? '/activity' : '/activity/user';
+  return apiFetch<Activity[]>(path);
 };
 
-export const updateActivity = async (id: string, data: Partial<Activity>): Promise<Activity> => {
-  const activities = getFromDB<Activity>(DB_KEYS.ACTIVITIES);
-  const index = activities.findIndex(a => a.id === id);
-  if (index === -1) throw new Error('Activity not found');
-  activities[index] = { ...activities[index], ...data };
-  saveToDB(DB_KEYS.ACTIVITIES, activities);
-  return activities[index];
+export const getActivity = async (id: string): Promise<Activity | undefined> => {
+  // Documentation doesn't show GET /activity/:id, so we'll fetch all and filter for now
+  // or try to guess if the endpoint exists. For now, let's just get all.
+  const activities = await getActivities();
+  return activities.find(a => a.id === id);
+};
+
+export const createActivity = async (data: CreateActivityRequest): Promise<Activity> => {
+  return apiFetch<Activity>('/activity', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const updateActivity = async (id: string, data: Partial<CreateActivityRequest>): Promise<Activity> => {
+  return apiFetch<Activity>(`/activity/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 };
 
 export const deleteActivity = async (id: string): Promise<void> => {
-  const activities = getFromDB<Activity>(DB_KEYS.ACTIVITIES).filter(a => a.id !== id);
-  saveToDB(DB_KEYS.ACTIVITIES, activities);
+  return apiFetch<void>(`/activity/${id}`, {
+    method: 'DELETE',
+  });
 };
 
-export const updateStatus = async (id: string, status: ActivityStatus): Promise<void> => {
-  const activities = getFromDB<Activity>(DB_KEYS.ACTIVITIES);
-  const index = activities.findIndex(a => a.id === id);
-  if (index !== -1) {
-    activities[index].status = status;
-    saveToDB(DB_KEYS.ACTIVITIES, activities);
-  }
+export const updateStatus = async (activityId: string, status: string): Promise<Activity> => {
+  return apiFetch<Activity>('/activity/status/change', {
+    method: 'PUT',
+    body: JSON.stringify({ activityId, status }),
+  });
 };
 
-export const registerForActivity = async (activityId: string): Promise<void> => {
-  const activities = getFromDB<Activity>(DB_KEYS.ACTIVITIES);
-  const index = activities.findIndex(a => a.id === activityId);
-  if (index !== -1) {
-    activities[index].registeredCount += 1;
-    saveToDB(DB_KEYS.ACTIVITIES, activities);
-  }
+export const registerForActivity = async (userId: string, activityId: string): Promise<any> => {
+  return apiFetch<any>('/activity-registration', {
+    method: 'POST',
+    body: JSON.stringify({ userId, activityId }),
+  });
 };
 
-export const submitLeaveRequest = async (activityId: string, reason: string): Promise<void> => {
-  console.log(`Submitting leave for ${activityId} with reason: ${reason}`);
-  const activities = getFromDB<Activity>(DB_KEYS.ACTIVITIES);
-  const index = activities.findIndex(a => a.id === activityId);
-  if (index !== -1) {
-    activities[index].registeredCount -= 1;
-    saveToDB(DB_KEYS.ACTIVITIES, activities);
-  }
+export const submitLeaveRequest = async (activityId: string, cancellationReason: string): Promise<any> => {
+  return apiFetch<any>('/activity-registration/cancel', {
+    method: 'PUT',
+    body: JSON.stringify({ activityId, cancellationReason }),
+  });
 };

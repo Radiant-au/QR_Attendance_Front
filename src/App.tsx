@@ -3,8 +3,8 @@ import { useEffect, type FC, type ReactNode } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 
-import { initDB } from './lib/db';
-import { Role, User } from './types';
+
+import { Role, type User } from './types';
 import { STORAGE_KEYS } from './config';
 
 // Features
@@ -51,24 +51,29 @@ const LoginPage = () => {
   );
 };
 
+import { Toaster } from 'sonner';
+
 const App: FC = () => {
-  useEffect(() => { initDB(); }, []);
+  useEffect(() => { }, []);
 
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/complete-profile" element={<ProfileCompletion />} />
-        <Route path="/home" element={<AuthGuard role={Role.USER}><UserHome /></AuthGuard>} />
-        <Route path="/qr" element={<AuthGuard role={Role.USER}><MyQR /></AuthGuard>} />
-        <Route path="/admin/dashboard" element={<AuthGuard role={Role.ADMIN}><AdminDashboard /></AuthGuard>} />
-        <Route path="/admin/users" element={<AuthGuard role={Role.ADMIN}><AdminUsers /></AuthGuard>} />
-        <Route path="/admin/activities" element={<AuthGuard role={Role.ADMIN}><AdminActivities /></AuthGuard>} />
-        <Route path="/admin/scan" element={<AuthGuard role={Role.ADMIN}><AdminScan /></AuthGuard>} />
-        <Route path="/admin/scan/:activityId" element={<AuthGuard role={Role.ADMIN}><AdminScan /></AuthGuard>} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </HashRouter>
+    <>
+      <Toaster position="top-center" expand={false} richColors />
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/complete-profile" element={<ProfileCompletion />} />
+          <Route path="/home" element={<AuthGuard role={Role.USER}><UserHome /></AuthGuard>} />
+          <Route path="/qr" element={<AuthGuard role={Role.USER}><MyQR /></AuthGuard>} />
+          <Route path="/admin/dashboard" element={<AuthGuard role={Role.ADMIN}><AdminDashboard /></AuthGuard>} />
+          <Route path="/admin/users" element={<AuthGuard role={Role.ADMIN}><AdminUsers /></AuthGuard>} />
+          <Route path="/admin/activities" element={<AuthGuard role={Role.ADMIN}><AdminActivities /></AuthGuard>} />
+          <Route path="/admin/scan" element={<AuthGuard role={Role.ADMIN}><AdminScan /></AuthGuard>} />
+          <Route path="/admin/scan/:activityId" element={<AuthGuard role={Role.ADMIN}><AdminScan /></AuthGuard>} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </HashRouter>
+    </>
   );
 };
 

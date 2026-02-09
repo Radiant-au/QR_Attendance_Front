@@ -1,18 +1,35 @@
 
-import { User, Role } from '../../../types';
-import { DB_KEYS } from '../../../config';
-import { getFromDB, saveToDB } from '../../../lib/db';
+import { type User, type CreateUserRequest, type UpdateUserRequest } from '../../../types';
+import { apiFetch } from '../../../lib/apiClient';
 
-export const getUsers = async (): Promise<User[]> => getFromDB<User>(DB_KEYS.USERS);
+export const getUsers = async (): Promise<User[]> => {
+  return apiFetch<User[]>('/user');
+};
 
-export const createUser = async (user: Partial<User>): Promise<User> => {
-  const users = getFromDB<User>(DB_KEYS.USERS);
-  const newUser = { ...user, id: Math.random().toString(36).substr(2, 9), isProfileCompleted: false } as User;
-  saveToDB(DB_KEYS.USERS, [...users, newUser]);
-  return newUser;
+export const getUserById = async (id: string): Promise<User> => {
+  return apiFetch<User>(`/user/${id}`);
+};
+
+export const createUser = async (data: CreateUserRequest): Promise<User> => {
+  return apiFetch<User>('/user', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const updateUser = async (id: string, data: UpdateUserRequest): Promise<User> => {
+  return apiFetch<User>(`/user/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 };
 
 export const deleteUser = async (id: string): Promise<void> => {
-  const users = getFromDB<User>(DB_KEYS.USERS).filter(u => u.id !== id);
-  saveToDB(DB_KEYS.USERS, users);
+  return apiFetch<void>(`/user/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+export const getQR = async (id: string): Promise<{ qrToken: string }> => {
+  return apiFetch<{ qrToken: string }>(`/user/getQR/${id}`);
 };

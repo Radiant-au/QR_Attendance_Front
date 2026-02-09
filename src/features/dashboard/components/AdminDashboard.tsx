@@ -20,11 +20,11 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {stats.map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-[2rem] border shadow-sm flex items-center gap-5">
-             <div className={`w-16 h-16 rounded-[1.25rem] ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}><stat.icon size={32} /></div>
-             <div>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-               <p className="text-3xl font-black text-slate-900">{stat.value}</p>
-             </div>
+            <div className={`w-16 h-16 rounded-[1.25rem] ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}><stat.icon size={32} /></div>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+              <p className="text-3xl font-black text-slate-900">{stat.value}</p>
+            </div>
           </div>
         ))}
       </div>

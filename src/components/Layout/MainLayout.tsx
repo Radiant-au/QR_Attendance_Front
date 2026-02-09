@@ -36,37 +36,36 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white flex-col p-6 z-50">
-         <div className="mb-10 flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="font-bold text-lg">T</span>
-            </div>
-            <h1 className="text-xl font-bold tracking-tight">Technologia</h1>
-         </div>
-         <nav className="flex-1 space-y-2">
-            {currentNav.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                  location.pathname === item.path ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800'
+        <div className="mb-10 flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="font-bold text-lg">T</span>
+          </div>
+          <h1 className="text-xl font-bold tracking-tight">Technologia</h1>
+        </div>
+        <nav className="flex-1 space-y-2">
+          {currentNav.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${location.pathname === item.path ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800'
                 }`}
-              >
-                <item.icon size={20} />
-                <span className="font-medium">{item.name}</span>
-              </button>
-            ))}
-         </nav>
-         <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-red-400 transition-colors mt-auto">
-           <LogOut size={20} />
-           <span className="font-medium">Logout</span>
-         </button>
+            >
+              <item.icon size={20} />
+              <span className="font-medium">{item.name}</span>
+            </button>
+          ))}
+        </nav>
+        <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-red-400 transition-colors mt-auto">
+          <LogOut size={20} />
+          <span className="font-medium">Logout</span>
+        </button>
       </aside>
 
       <div className="flex-1 flex flex-col md:pl-64">
         <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 px-4 py-4 flex items-center justify-between md:hidden">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-               <span className="text-white font-bold text-sm">T</span>
+              <span className="text-white font-bold text-sm">T</span>
             </div>
             <h1 className="text-lg font-bold text-slate-900">Technologia</h1>
           </div>
@@ -84,9 +83,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center gap-1 transition-colors ${
-                location.pathname === item.path ? 'text-blue-600' : 'text-slate-400'
-              }`}
+              className={`flex flex-col items-center gap-1 transition-colors ${location.pathname === item.path ? 'text-blue-600' : 'text-slate-400'
+                }`}
             >
               <item.icon size={22} />
               <span className="text-[10px] font-bold uppercase tracking-tight">{item.name}</span>

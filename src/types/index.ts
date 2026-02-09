@@ -13,23 +13,24 @@ export enum ActivityStatus {
 
 export interface User {
   id: string;
-  email: string;
+  username: string;
   fullName?: string;
   major?: string;
   year?: string;
-  isProfileCompleted: boolean;
+  isProfileCompleted: boolean | string;
   role: Role;
+  createdAt?: string;
 }
 
 export interface Activity {
   id: string;
   title: string;
   description: string;
-  date: string;
-  time: string;
+  startDateTime: string;
+  endDateTime: string;
   location: string;
-  status: ActivityStatus;
-  registeredCount: number;
+  status: ActivityStatus | string;
+  registeredCount?: number;
 }
 
 export interface Registration {
@@ -37,10 +38,53 @@ export interface Registration {
   activityId: string;
   userId: string;
   status: 'registered' | 'attended' | 'cancelled';
+  cancellationReason?: string;
   cancelReason?: string;
 }
 
 export interface AuthResponse {
   token: string;
-  user: User;
+  user?: User;
+}
+
+// Request DTOs
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  password: string;
+  role: string;
+}
+
+export interface UpdateUserRequest {
+  fullName: string;
+  major: string;
+  year: string;
+}
+
+export interface CreateActivityRequest {
+  title: string;
+  description: string;
+  startDateTime: string;
+  endDateTime: string;
+  location: string;
+  status: string;
+}
+
+export interface UpdateActivityStatusRequest {
+  activityId: string;
+  status: string;
+}
+
+export interface RegisterActivityRequest {
+  userId: string;
+  activityId: string;
+}
+
+export interface CancelActivityRequest {
+  cancellationReason: string;
+  activityId: string;
 }

@@ -1,38 +1,51 @@
-
 import React, { useEffect, useState } from 'react';
 import { MainLayout } from '../../../components/Layout/MainLayout';
-import { Role, User } from '../../../types';
+import { Role, type User } from '../../../types';
 import { getUsers, createUser, deleteUser } from '../api/users';
 import { UserPlus, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newEmail, setNewEmail] = useState('');
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<Role>(Role.USER);
 
   const fetchUsers = async () => {
-    setIsLoading(true);
-    const data = await getUsers();
-    setUsers(data);
-    setIsLoading(false);
+    try {
+      const data = await getUsers();
+      setUsers(data);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to fetch users');
+    }
   };
 
   useEffect(() => { fetchUsers(); }, []);
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createUser({ email: newEmail, role: newRole });
-    setShowAddModal(false);
-    setNewEmail('');
-    fetchUsers();
+    try {
+      await createUser({ username: newUsername, password: newPassword, role: newRole });
+      toast.success('User created successfully!');
+      setShowAddModal(false);
+      setNewUsername('');
+      setNewPassword('');
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create user');
+    }
   };
 
   const handleDeleteUser = async (id: string) => {
     if (confirm('Delete this user?')) {
-      await deleteUser(id);
-      fetchUsers();
+      try {
+        await deleteUser(id);
+        toast.success('User deleted successfully!');
+        fetchUsers();
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to delete user');
+      }
     }
   };
 
@@ -50,7 +63,7 @@ export const AdminUsers: React.FC = () => {
           <thead className="bg-slate-50 text-xs font-bold uppercase text-slate-500 tracking-wider">
             <tr>
               <th className="px-6 py-4">Full Name</th>
-              <th className="px-6 py-4">Email</th>
+              <th className="px-6 py-4">Username</th>
               <th className="px-6 py-4">Role</th>
               <th className="px-6 py-4 text-right">Actions</th>
             </tr>
@@ -59,7 +72,7 @@ export const AdminUsers: React.FC = () => {
             {users.map(user => (
               <tr key={user.id} className="text-sm">
                 <td className="px-6 py-4 font-bold">{user.fullName || 'Uncompleted'}</td>
-                <td className="px-6 py-4 text-slate-500">{user.email}</td>
+                <td className="px-6 py-4 text-slate-500">{user.username}</td>
                 <td className="px-6 py-4"><span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">{user.role}</span></td>
                 <td className="px-6 py-4 text-right">
                   <button onClick={() => handleDeleteUser(user.id)} className="text-slate-300 hover:text-red-600"><Trash2 size={18} /></button>
@@ -75,7 +88,8 @@ export const AdminUsers: React.FC = () => {
           <div className="bg-white rounded-2xl w-full max-w-md p-6">
             <h2 className="text-xl font-bold mb-4">Add User</h2>
             <form onSubmit={handleAddUser} className="space-y-4">
-              <input type="email" placeholder="Email" required className="w-full px-4 py-3 border rounded-xl" value={newEmail} onChange={e => setNewEmail(e.target.value)} />
+              <input type="text" placeholder="Username" required className="w-full px-4 py-3 border rounded-xl" value={newUsername} onChange={e => setNewUsername(e.target.value)} />
+              <input type="password" placeholder="Password" required className="w-full px-4 py-3 border rounded-xl" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
               <select className="w-full px-4 py-3 border rounded-xl" value={newRole} onChange={e => setNewRole(e.target.value as Role)}>
                 <option value={Role.USER}>Student</option>
                 <option value={Role.ADMIN}>Admin</option>

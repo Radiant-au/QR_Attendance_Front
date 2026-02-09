@@ -2,9 +2,8 @@
 import { useEffect, useState } from 'react';
 import { MainLayout } from '../../../components/Layout/MainLayout';
 import { getQRUrl } from '../api/attendance';
-import { Role, User } from '../../../types';
+import { Role, type User } from '../../../types';
 import { STORAGE_KEYS } from '../../../config';
-import { RefreshCw, ShieldCheck } from 'lucide-react';
 
 export const MyQR: React.FC = () => {
   const [qrUrl, setQrUrl] = useState<string | null>(null);

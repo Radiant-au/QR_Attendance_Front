@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, CheckCircle2 } from 'lucide-react';
 import { getActivity } from '../../activities/api/activities';
-import { Activity } from '../../../types';
+import { type Activity } from '../../../types';
 
 export const AdminScan = () => {
   const { activityId } = useParams<{ activityId: string }>();

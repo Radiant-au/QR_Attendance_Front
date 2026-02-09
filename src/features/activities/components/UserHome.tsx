@@ -1,9 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { MainLayout } from '../../../components/Layout/MainLayout';
 import ActivityCard from './ActivityCard';
 import { getActivities, registerForActivity, submitLeaveRequest } from '../api/activities';
-import { Activity, Role } from '../../../types';
+import { type Activity, Role } from '../../../types';
+import { STORAGE_KEYS } from '../../../config';
+import { toast } from 'sonner';
 
 export const UserHome: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -11,20 +12,42 @@ export const UserHome: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getActivities().then(data => {
-      setActivities(data);
-      setIsLoading(false);
-    });
+    getActivities(false)
+      .then(data => {
+        setActivities(data);
+        setIsLoading(false);
+      })
+      .catch((error: any) => {
+        toast.error(error.message || 'Failed to fetch activities');
+        setIsLoading(false);
+      });
   }, []);
 
-  const handleRegister = async (id: string) => {
-    await registerForActivity(id);
-    setRegisteredIds(prev => new Set([...prev, id]));
-    setActivities(prev => prev.map(a => a.id === id ? { ...a, registeredCount: a.registeredCount + 1 } : a));
+  const handleRegister = async (activityId: string) => {
+    const userJson = localStorage.getItem(STORAGE_KEYS.USER);
+    const user = userJson ? JSON.parse(userJson) : null;
+
+    if (!user?.id) {
+      toast.error('You must be logged in to register.');
+      return;
+    }
+
+    try {
+      await registerForActivity(user.id, activityId);
+      setRegisteredIds(prev => new Set([...prev, activityId]));
+      toast.success('Registered successfully! See you there.');
+    } catch (error: any) {
+      toast.error(error.message || 'Registration failed');
+    }
   };
 
-  const handleCancel = async (id: string, reason: string) => {
-    await submitLeaveRequest(id, reason);
+  const handleCancel = async (activityId: string, reason: string) => {
+    try {
+      await submitLeaveRequest(activityId, reason);
+      toast.success('Leave request submitted.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to submit leave request');
+    }
   };
 
   return (

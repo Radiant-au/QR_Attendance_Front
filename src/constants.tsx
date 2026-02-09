@@ -1,6 +1,4 @@
 
-import React from 'react';
-
 export const COLORS = {
   primary: '#2563eb', // Blue 600
   secondary: '#1e293b', // Slate 800

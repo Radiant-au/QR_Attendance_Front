@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User as UserIcon, BookOpen, GraduationCap, ChevronRight } from 'lucide-react';
-import { updateProfile } from '../api/auth';
+import { User as UserIcon, ChevronRight } from 'lucide-react';
+import { userApi } from '../../../services/api';
 import { STORAGE_KEYS } from '../../../config';
-import { User } from '../../../types';
+import { type User } from '../../../types';
+import { toast } from 'sonner';
 
 export const ProfileCompletion: React.FC = () => {
   const [fullName, setFullName] = useState('');
@@ -18,20 +19,24 @@ export const ProfileCompletion: React.FC = () => {
 
   useEffect(() => {
     if (!currentUser) navigate('/');
-    else if (currentUser.isProfileCompleted) navigate('/home');
+    else if (currentUser.isProfileCompleted === 'true' || currentUser.isProfileCompleted === 'string_true') {
+      // Backend says isProfileCompleted is string, we'll need to check how it actually looks
+      navigate('/home');
+    }
   }, [currentUser, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
-    
+
     setIsLoading(true);
     try {
-      const updatedUser = await updateProfile(currentUser.id, { fullName, major, year });
+      const updatedUser = await userApi.updateProfile(currentUser.id, { fullName, major, year });
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+      toast.success('Profile updated successfully!');
       navigate('/home');
-    } catch (error) {
-      alert('Failed to update profile.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update profile.');
     } finally {
       setIsLoading(false);
     }
