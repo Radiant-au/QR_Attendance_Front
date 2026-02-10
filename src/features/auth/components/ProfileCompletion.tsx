@@ -2,25 +2,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserIcon, ChevronRight } from 'lucide-react';
-import { userApi } from '../../../services/api';
+import { useUpdateProfile } from '../api/auth.hooks';
 import { STORAGE_KEYS } from '../../../config';
-import { type User } from '../../../types';
+import { type User, type Major, type Year } from '../../../types';
 import { toast } from 'sonner';
 
 export const ProfileCompletion: React.FC = () => {
   const [fullName, setFullName] = useState('');
-  const [major, setMajor] = useState('');
-  const [year, setYear] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [major, setMajor] = useState<Major | ''>('');
+  const [year, setYear] = useState<Year | ''>('');
   const navigate = useNavigate();
+
+  const updateProfileMutation = useUpdateProfile();
+  const isLoading = updateProfileMutation.isPending;
 
   const userJson = localStorage.getItem(STORAGE_KEYS.USER);
   const currentUser: User | null = userJson ? JSON.parse(userJson) : null;
 
   useEffect(() => {
     if (!currentUser) navigate('/');
-    else if (currentUser.isProfileCompleted === 'true' || currentUser.isProfileCompleted === 'string_true') {
-      // Backend says isProfileCompleted is string, we'll need to check how it actually looks
+    else if (currentUser.isProfileCompleted === 'true' || currentUser.isProfileCompleted === true) {
       navigate('/home');
     }
   }, [currentUser, navigate]);
@@ -29,17 +30,23 @@ export const ProfileCompletion: React.FC = () => {
     e.preventDefault();
     if (!currentUser) return;
 
-    setIsLoading(true);
-    try {
-      const updatedUser = await userApi.updateProfile(currentUser.id, { fullName, major, year });
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
-      toast.success('Profile updated successfully!');
-      navigate('/home');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile.');
-    } finally {
-      setIsLoading(false);
-    }
+    updateProfileMutation.mutate({
+      id: currentUser.id,
+      data: {
+        fullName,
+        major: major as Major,
+        year: year as Year,
+        isProfileCompleted: true
+      }
+    }, {
+      onSuccess: () => {
+        toast.success('Profile updated successfully!');
+        navigate('/home');
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Failed to update profile.');
+      }
+    });
   };
 
   return (
@@ -60,16 +67,25 @@ export const ProfileCompletion: React.FC = () => {
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">Major</label>
-              <input required type="text" className="w-full px-4 py-4 bg-slate-50 rounded-2xl outline-none" value={major} onChange={e => setMajor(e.target.value)} />
+              <select required className="w-full px-4 py-4 bg-slate-50 rounded-2xl outline-none" value={major} onChange={e => setMajor(e.target.value as Major)}>
+                <option value="">Select Major</option>
+                <option value="IS">IS (Information Science)</option>
+                <option value="CE">CE (Civil Engineering)</option>
+                <option value="EcE">EcE (Electronic Engineering)</option>
+                <option value="PrE">PrE (Probationary Engineering?)</option>
+                <option value="AME">AME (Aerospace Engineering?)</option>
+              </select>
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">Year</label>
-              <select required className="w-full px-4 py-4 bg-slate-50 rounded-2xl outline-none" value={year} onChange={e => setYear(e.target.value)}>
+              <select required className="w-full px-4 py-4 bg-slate-50 rounded-2xl outline-none" value={year} onChange={e => setYear(e.target.value as Year)}>
                 <option value="">Select Year</option>
-                <option value="1st Year">1st Year</option>
-                <option value="2nd Year">2nd Year</option>
-                <option value="3rd Year">3rd Year</option>
-                <option value="4th Year">4th Year</option>
+                <option value="1st">1st Year</option>
+                <option value="2nd">2nd Year</option>
+                <option value="3rd">3rd Year</option>
+                <option value="4th">4th Year</option>
+                <option value="5th">5th Year</option>
+                <option value="6th">6th Year</option>
               </select>
             </div>
           </div>

@@ -30,6 +30,3 @@ export const deleteUser = async (id: string): Promise<void> => {
   });
 };
 
-export const getQR = async (id: string): Promise<{ qrToken: string }> => {
-  return apiFetch<{ qrToken: string }>(`/user/getQR/${id}`);
-};

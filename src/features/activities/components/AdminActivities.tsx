@@ -1,14 +1,13 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { MainLayout } from '../../../components/Layout/MainLayout';
 import { type Activity, ActivityStatus, Role } from '../../../types';
-import { getActivities, createActivity, updateActivity, updateStatus } from '../api/activities';
-import { Scan, Play, Lock } from 'lucide-react';
+import { useActivities, useCreateActivity, useUpdateActivity, useUpdateActivityStatus } from '../api/activities.hooks';
+import { Scan, Play, Lock, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export const AdminActivities: React.FC = () => {
-  const [activities, setActivities] = useState<Activity[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingAct, setEditingAct] = useState<Activity | null>(null);
   const navigate = useNavigate();
@@ -21,47 +20,42 @@ export const AdminActivities: React.FC = () => {
     status: 'Upcoming'
   });
 
-  const fetchActivities = async () => {
-    try {
-      const data = await getActivities(true);
-      setActivities(data);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to fetch activities');
-    }
-  };
-  useEffect(() => { fetchActivities(); }, []);
+  const { data: activities = [], isLoading: isFetching } = useActivities(true);
+  const createActivityMutation = useCreateActivity();
+  const updateActivityMutation = useUpdateActivity();
+  const updateStatusMutation = useUpdateActivityStatus();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const data = {
-        ...form,
-        startDateTime: new Date(form.startDateTime).toISOString(),
-        endDateTime: new Date(form.endDateTime || form.startDateTime).toISOString()
-      };
+    const data = {
+      ...form,
+      startDateTime: new Date(form.startDateTime).toISOString(),
+      endDateTime: new Date(form.endDateTime || form.startDateTime).toISOString()
+    };
 
-      if (editingAct) {
-        await updateActivity(editingAct.id, data);
-        toast.success('Activity updated successfully!');
-      } else {
-        await createActivity(data);
-        toast.success('Activity created successfully!');
+    const mutation = editingAct ? updateActivityMutation : createActivityMutation;
+    const mutationArgs = editingAct ? { id: editingAct.id, data } : data;
+
+    (mutation as any).mutate(mutationArgs, {
+      onSuccess: () => {
+        toast.success(`Activity ${editingAct ? 'updated' : 'created'} successfully!`);
+        setShowModal(false);
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Action failed');
       }
-      setShowModal(false);
-      fetchActivities();
-    } catch (error: any) {
-      toast.error(error.message || 'Action failed');
-    }
+    });
   };
 
   const handleStatusUpdate = async (activityId: string, status: string) => {
-    try {
-      await updateStatus(activityId, status);
-      toast.success(`Status updated to ${status}`);
-      fetchActivities();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update status');
-    }
+    updateStatusMutation.mutate({ activityId, status }, {
+      onSuccess: () => {
+        toast.success(`Status updated to ${status}`);
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Failed to update status');
+      }
+    });
   };
 
   return (
@@ -77,14 +71,43 @@ export const AdminActivities: React.FC = () => {
         </button>
       </header>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {activities.map(act => (
+        {isFetching ? (
+          <div className="col-span-full py-20 text-center flex flex-col items-center gap-4">
+            <Loader2 className="animate-spin text-blue-600" size={40} />
+            <span className="font-black uppercase tracking-widest text-slate-400">Loading Events...</span>
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="col-span-full py-20 text-center text-slate-400">
+            <span className="font-black uppercase tracking-widest">No Events Found</span>
+          </div>
+        ) : activities.map(act => (
           <div key={act.id} className="bg-white p-6 rounded-[2rem] border shadow-sm flex flex-col gap-4">
             <h3 className="font-bold text-lg">{act.title}</h3>
             <p className="text-sm text-slate-500">{act.description}</p>
             <div className="flex gap-2">
-              {(act.status === ActivityStatus.UPCOMING || act.status === 'Upcoming') && <button onClick={() => handleStatusUpdate(act.id, ActivityStatus.REGISTRATION_CLOSED)} className="flex-1 bg-amber-500 text-white py-2 rounded-xl text-xs font-bold uppercase"><Lock size={14} className="inline mr-1" /> Close Reg</button>}
-              {(act.status === ActivityStatus.REGISTRATION_CLOSED || act.status === 'Registration Closed') && <button onClick={() => handleStatusUpdate(act.id, ActivityStatus.ONGOING)} className="flex-1 bg-green-600 text-white py-2 rounded-xl text-xs font-bold uppercase"><Play size={14} className="inline mr-1" /> Start</button>}
-              {(act.status === ActivityStatus.ONGOING || act.status === 'Ongoing') && <button onClick={() => navigate(`/admin/scan/${act.id}`)} className="flex-1 bg-slate-900 text-white py-2 rounded-xl text-xs font-bold uppercase"><Scan size={14} className="inline mr-1" /> Scan</button>}
+              {(act.status === ActivityStatus.UPCOMING || act.status === 'Upcoming') && (
+                <button
+                  onClick={() => handleStatusUpdate(act.id, ActivityStatus.REGISTRATION_CLOSED)}
+                  disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.activityId === act.id}
+                  className="flex-1 bg-amber-500 text-white py-2 rounded-xl text-xs font-bold uppercase transition-all disabled:opacity-50"
+                >
+                  <Lock size={14} className="inline mr-1" /> Close Reg
+                </button>
+              )}
+              {(act.status === ActivityStatus.REGISTRATION_CLOSED || act.status === 'Registration Closed') && (
+                <button
+                  onClick={() => handleStatusUpdate(act.id, ActivityStatus.ONGOING)}
+                  disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.activityId === act.id}
+                  className="flex-1 bg-green-600 text-white py-2 rounded-xl text-xs font-bold uppercase transition-all disabled:opacity-50"
+                >
+                  <Play size={14} className="inline mr-1" /> Start
+                </button>
+              )}
+              {(act.status === ActivityStatus.ONGOING || act.status === 'Ongoing') && (
+                <button onClick={() => navigate(`/admin/scan/${act.id}`)} className="flex-1 bg-slate-900 text-white py-2 rounded-xl text-xs font-bold uppercase hover:bg-black transition-all">
+                  <Scan size={14} className="inline mr-1" /> Scan
+                </button>
+              )}
             </div>
           </div>
         ))}

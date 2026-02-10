@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { UserIcon as UserIcon, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
-import { authApi } from '../../../services/api';
-import { STORAGE_KEYS } from '../../../config';
 import { toast } from 'sonner';
+import { useLogin, useAdminLogin } from '../api/auth.hooks';
+import type { AuthResponse } from '../../../types';
 
 interface LoginFormProps {
   onSuccess: (isAdmin: boolean, isProfileCompleted: boolean) => void;
@@ -12,30 +12,25 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+
+  const loginMutation = useLogin();
+  const adminLoginMutation = useAdminLogin();
+  const isLoading = loginMutation.isPending || adminLoginMutation.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      const response = isAdmin
-        ? await authApi.loginAdmin(username, password)
-        : await authApi.loginUser(username, password);
 
-      localStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
+    const mutation = isAdmin ? adminLoginMutation : loginMutation;
 
-      // TODO: Since the backend only returns a token, we need an endpoint to fetch user details.
-      // For now, we'll store a placeholder or wait for further integration.
-      // localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(response.user));
-
-      toast.success('Login successful! Welcome back.');
-      // Placeholder: default to true for now to allow entry, or handle appropriately
-      onSuccess(isAdmin, true);
-    } catch (error: any) {
-      toast.error(error.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setIsLoading(false);
-    }
+    mutation.mutate({ username, password }, {
+      onSuccess: (data: AuthResponse) => {
+        toast.success('Login successful! Welcome back.');
+        onSuccess(isAdmin, data.user?.isProfileCompleted === true || data.user?.isProfileCompleted === 'true');
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Login failed. Please check your credentials.');
+      }
+    });
   };
 
   return (

@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, QrCode, LogOut, LayoutDashboard, Users, Calendar } from 'lucide-react';
 import { Role } from '../../types';
 import { STORAGE_KEYS } from '../../config';
+import { authApi } from '../../features/auth/api/auth';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,7 +15,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
     localStorage.removeItem(STORAGE_KEYS.TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER);
     navigate('/');

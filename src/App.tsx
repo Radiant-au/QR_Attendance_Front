@@ -1,6 +1,6 @@
 
 import { useEffect, type FC, type ReactNode } from 'react';
-import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 
 
@@ -18,20 +18,47 @@ import { AdminActivities } from './features/activities/components/AdminActivitie
 import { AdminScan } from './features/attendance/components/AdminScan';
 
 const AuthGuard = ({ children, role }: { children?: ReactNode, role?: Role }) => {
-  const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
   const userJson = localStorage.getItem(STORAGE_KEYS.USER);
   const user: User | null = userJson ? JSON.parse(userJson) : null;
+  const location = useLocation();
 
-  if (!token || !user) return <Navigate to="/" />;
-  if (role && user.role !== role) return <Navigate to="/" />;
-  if (user.role === Role.USER && !user.isProfileCompleted && window.location.hash !== '#/complete-profile') {
-    return <Navigate to="/complete-profile" />;
+  if (!user) return <Navigate to="/" replace />;
+
+  // Case-insensitive role check
+  const userRole = user.role?.toString().toUpperCase();
+  const requiredRole = role?.toString().toUpperCase();
+
+  if (requiredRole && userRole !== requiredRole) {
+    return <Navigate to="/" replace />;
+  }
+
+  const isProfileCompleted = user.isProfileCompleted === true || user.isProfileCompleted === 'true';
+  if (userRole === Role.USER && !isProfileCompleted && location.pathname !== '/complete-profile') {
+    return <Navigate to="/complete-profile" replace />;
   }
   return <>{children}</>;
 };
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const userJson = localStorage.getItem(STORAGE_KEYS.USER);
+  const user: User | null = userJson ? JSON.parse(userJson) : null;
+
+  useEffect(() => {
+    if (user) {
+      const isProfileCompleted = user.isProfileCompleted === true || user.isProfileCompleted === 'true';
+      const role = user.role?.toString().toUpperCase();
+
+      if (role === Role.ADMIN) {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (!isProfileCompleted) {
+        navigate('/complete-profile', { replace: true });
+      } else {
+        navigate('/home', { replace: true });
+      }
+    }
+  }, [user, navigate]);
+
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
       <div className="w-full max-w-[440px]">
@@ -42,24 +69,30 @@ const LoginPage = () => {
           <h1 className="text-3xl font-extrabold text-slate-900">Technologia</h1>
           <p className="text-slate-500 mt-2">QR Attendance System</p>
         </div>
-        <LoginForm onSuccess={(isAdmin: boolean) => {
-          if (isAdmin) navigate('/admin/dashboard');
-          else navigate('/home');
+        <LoginForm onSuccess={(isAdmin, isProfileCompleted) => {
+          if (isAdmin) {
+            navigate('/admin/dashboard', { replace: true });
+          } else if (!isProfileCompleted) {
+            navigate('/complete-profile', { replace: true });
+          } else {
+            navigate('/home', { replace: true });
+          }
         }} />
       </div>
     </div>
   );
 };
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 
-const App: FC = () => {
-  useEffect(() => { }, []);
+const queryClient = new QueryClient();
 
+const App: FC = () => {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <Toaster position="top-center" expand={false} richColors />
-      <HashRouter>
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/complete-profile" element={<ProfileCompletion />} />
@@ -70,10 +103,10 @@ const App: FC = () => {
           <Route path="/admin/activities" element={<AuthGuard role={Role.ADMIN}><AdminActivities /></AuthGuard>} />
           <Route path="/admin/scan" element={<AuthGuard role={Role.ADMIN}><AdminScan /></AuthGuard>} />
           <Route path="/admin/scan/:activityId" element={<AuthGuard role={Role.ADMIN}><AdminScan /></AuthGuard>} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </HashRouter>
-    </>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
 

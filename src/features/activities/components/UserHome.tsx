@@ -1,27 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { MainLayout } from '../../../components/Layout/MainLayout';
 import ActivityCard from './ActivityCard';
-import { getActivities, registerForActivity, submitLeaveRequest } from '../api/activities';
-import { type Activity, Role } from '../../../types';
+import { useActivities, useRegisterActivity, useCancelRegistration } from '../api/activities.hooks';
+import { Role } from '../../../types';
 import { STORAGE_KEYS } from '../../../config';
 import { toast } from 'sonner';
 
 export const UserHome: React.FC = () => {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    getActivities(false)
-      .then(data => {
-        setActivities(data);
-        setIsLoading(false);
-      })
-      .catch((error: any) => {
-        toast.error(error.message || 'Failed to fetch activities');
-        setIsLoading(false);
-      });
-  }, []);
+  const { data: activities = [], isLoading } = useActivities(false);
+  const registerMutation = useRegisterActivity();
+  const cancelMutation = useCancelRegistration();
 
   const handleRegister = async (activityId: string) => {
     const userJson = localStorage.getItem(STORAGE_KEYS.USER);
@@ -32,22 +20,25 @@ export const UserHome: React.FC = () => {
       return;
     }
 
-    try {
-      await registerForActivity(user.id, activityId);
-      setRegisteredIds(prev => new Set([...prev, activityId]));
-      toast.success('Registered successfully! See you there.');
-    } catch (error: any) {
-      toast.error(error.message || 'Registration failed');
-    }
+    registerMutation.mutate({ userId: user.id, activityId }, {
+      onSuccess: () => {
+        toast.success('Registered successfully! See you there.');
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Registration failed');
+      }
+    });
   };
 
   const handleCancel = async (activityId: string, reason: string) => {
-    try {
-      await submitLeaveRequest(activityId, reason);
-      toast.success('Leave request submitted.');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to submit leave request');
-    }
+    cancelMutation.mutate({ activityId, cancellationReason: reason }, {
+      onSuccess: () => {
+        toast.success('Leave request submitted.');
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Failed to submit leave request');
+      }
+    });
   };
 
   return (
@@ -63,7 +54,7 @@ export const UserHome: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {activities.map(act => (
-            <ActivityCard key={act.id} activity={act} isRegistered={registeredIds.has(act.id)} onRegister={handleRegister} onCancel={handleCancel} />
+            <ActivityCard key={act.id} activity={act} isRegistered={!!act.isRegistered} onRegister={handleRegister} onCancel={handleCancel} />
           ))}
         </div>
       )}

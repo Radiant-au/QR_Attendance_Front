@@ -2,23 +2,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, CheckCircle2 } from 'lucide-react';
-import { getActivity } from '../../activities/api/activities';
-import { type Activity } from '../../../types';
+import { useActivity } from '../../activities/api/activities.hooks';
 
 export const AdminScan = () => {
   const { activityId } = useParams<{ activityId: string }>();
-  const [activity, setActivity] = useState<Activity | null>(null);
+  const { data: activity } = useActivity(activityId || '');
   const [lastScanned, setLastScanned] = useState<{ name: string; time: string } | null>(null);
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (activityId) getActivity(activityId).then(data => data && setActivity(data));
     if (navigator.mediaDevices) {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
         .then(stream => { if (videoRef.current) videoRef.current.srcObject = stream; });
     }
-  }, [activityId]);
+  }, []);
 
   const simulateScan = () => {
     setLastScanned({ name: `Student #${Math.floor(Math.random() * 9000) + 1000}`, time: new Date().toLocaleTimeString() });

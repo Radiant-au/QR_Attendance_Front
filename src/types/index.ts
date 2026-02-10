@@ -1,22 +1,25 @@
 
 export enum Role {
-  USER = 'USER',
-  ADMIN = 'ADMIN'
+  USER = 'user',
+  ADMIN = 'admin'
 }
 
 export enum ActivityStatus {
-  UPCOMING = 'Upcoming',
-  REGISTRATION_CLOSED = 'Registration Closed',
-  ONGOING = 'Ongoing',
-  COMPLETED = 'Completed'
+  UPCOMING = 'upcoming',
+  REGISTRATION_CLOSED = 'closed',
+  ONGOING = 'ongoing',
+  COMPLETED = 'completed'
 }
+
+export type Major = 'IS' | 'CE' | 'EcE' | 'PrE' | 'AME';
+export type Year = '1st' | '2nd' | '3rd' | '4th' | '5th' | '6th';
 
 export interface User {
   id: string;
   username: string;
   fullName?: string;
-  major?: string;
-  year?: string;
+  major?: Major;
+  year?: Year;
   isProfileCompleted: boolean | string;
   role: Role;
   createdAt?: string;
@@ -31,6 +34,7 @@ export interface Activity {
   location: string;
   status: ActivityStatus | string;
   registeredCount?: number;
+  isRegistered?: boolean;
 }
 
 export interface Registration {
@@ -43,8 +47,7 @@ export interface Registration {
 }
 
 export interface AuthResponse {
-  token: string;
-  user?: User;
+  user: User;
 }
 
 // Request DTOs
@@ -61,17 +64,18 @@ export interface CreateUserRequest {
 
 export interface UpdateUserRequest {
   fullName: string;
-  major: string;
-  year: string;
+  major: Major;
+  year: Year;
+  isProfileCompleted?: boolean;
 }
 
 export interface CreateActivityRequest {
   title: string;
   description: string;
-  startDateTime: string;
-  endDateTime: string;
+  startDateTime: Date | string;
+  endDateTime?: Date | string;
   location: string;
-  status: string;
+  status?: string;
 }
 
 export interface UpdateActivityStatusRequest {
