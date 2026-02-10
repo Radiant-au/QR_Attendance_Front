@@ -70,8 +70,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
           </span>
           <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
             <Users size={14} className="text-slate-300" />
-            {/* Registered count missing in backend response for now */}
-            Joiners
+            {activity.registeredCount || 0} Joiners
           </div>
         </div>
 
@@ -115,7 +114,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
                 <>
                   {canRegister ? (
                     <button
-                      onClick={() => onRegister?.(activity.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRegister?.(activity.id);
+                      }}
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-200 text-sm flex items-center justify-center gap-2"
                     >
                       Join Activity
@@ -148,7 +150,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 
               {canSubmitLeave && (
                 <button
-                  onClick={() => setShowCancelDialog(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowCancelDialog(true);
+                  }}
                   className="w-full flex items-center justify-center gap-2 bg-white text-slate-600 hover:text-red-600 hover:bg-red-50 border-2 border-slate-200 hover:border-red-100 rounded-2xl text-sm font-bold transition-all py-3.5"
                 >
                   <FileText size={18} />

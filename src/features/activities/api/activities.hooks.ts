@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as activitiesApi from './activities';
 import { type CreateActivityRequest } from '../../../types';
 
-export const useActivities = (isAdmin: boolean = false) => {
+export const useActivities = () => {
     return useQuery({
-        queryKey: ['activities', { isAdmin }],
-        queryFn: () => activitiesApi.getActivities(isAdmin),
+        queryKey: ['activities'],
+        queryFn: () => activitiesApi.getActivities(),
     });
 };
 
@@ -86,5 +86,13 @@ export const useCancelRegistration = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['activities'] });
         },
+    });
+};
+
+export const useActivityAttendance = (activityId: string) => {
+    return useQuery({
+        queryKey: ['activities', activityId, 'attendance'],
+        queryFn: () => activitiesApi.getActivityAttendance(activityId),
+        enabled: !!activityId,
     });
 };

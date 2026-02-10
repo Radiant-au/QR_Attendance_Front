@@ -14,6 +14,12 @@ export enum ActivityStatus {
 export type Major = 'IS' | 'CE' | 'EcE' | 'PrE' | 'AME';
 export type Year = '1st' | '2nd' | '3rd' | '4th' | '5th' | '6th';
 
+export interface UserAttendance {
+  actvityName: string;
+  isPresent: boolean;
+  scanMethod: string;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -23,6 +29,11 @@ export interface User {
   isProfileCompleted: boolean | string;
   role: Role;
   createdAt?: string;
+}
+
+export interface OneUser extends User {
+  registrations: string[];
+  attendances: UserAttendance[];
 }
 
 export interface Activity {
@@ -72,8 +83,8 @@ export interface UpdateUserRequest {
 export interface CreateActivityRequest {
   title: string;
   description: string;
-  startDateTime: Date | string;
-  endDateTime?: Date | string;
+  startDateTime: Date;
+  endDateTime?: Date;
   location: string;
   status?: string;
 }
@@ -91,4 +102,39 @@ export interface RegisterActivityRequest {
 export interface CancelActivityRequest {
   cancellationReason: string;
   activityId: string;
+}
+
+export interface MarkAttendanceRequest {
+  activityId: string;
+  qrToken: string;
+  scanMethod: string;
+}
+
+export interface AttendanceResponse {
+  userName: string;
+  attendanceType: string;
+  message: string;
+}
+
+export interface ActivityRegistrationResponse {
+  username: string;
+  fullName: string;
+  major: string;
+  year: string;
+  registeredAt: Date;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  userName: string;
+  major: string;
+  year: string;
+  attendanceType: string;
+  isPresent: boolean;
+  notes: string;
+}
+
+export interface RegisterAttendanceResponseDTO {
+  registration: ActivityRegistrationResponse[];
+  attendance: AttendanceRecord[];
 }

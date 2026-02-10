@@ -2,9 +2,8 @@
 import { type Activity, type CreateActivityRequest } from '../../../types';
 import { apiFetch } from '../../../lib/apiClient';
 
-export const getActivities = async (isAdmin: boolean = false): Promise<Activity[]> => {
-  const path = isAdmin ? '/activity' : '/activity/user';
-  return apiFetch<Activity[]>(path);
+export const getActivities = async (): Promise<Activity[]> => {
+  return apiFetch<Activity[]>('/activity');
 };
 
 export const getActivity = async (id: string): Promise<Activity | undefined> => {
@@ -36,7 +35,7 @@ export const deleteActivity = async (id: string): Promise<void> => {
 
 export const updateStatus = async (activityId: string, status: string): Promise<Activity> => {
   return apiFetch<Activity>('/activity/status/change', {
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({ activityId, status }),
   });
 };
@@ -53,4 +52,8 @@ export const submitLeaveRequest = async (activityId: string, cancellationReason:
     method: 'PUT',
     body: JSON.stringify({ activityId, cancellationReason }),
   });
+};
+
+export const getActivityAttendance = async (activityId: string): Promise<any> => {
+  return apiFetch<any>(`/activity/${activityId}/attendance`);
 };

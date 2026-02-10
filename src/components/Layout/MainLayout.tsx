@@ -29,6 +29,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
   const userNav = [
     { name: 'Home', icon: Home, path: '/home' },
     { name: 'My QR', icon: QrCode, path: '/qr' },
+    { name: 'Profile', icon: Users, path: '/profile' },
   ];
 
   const adminNav = [

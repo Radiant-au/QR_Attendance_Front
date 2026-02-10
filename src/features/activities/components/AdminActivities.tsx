@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { MainLayout } from '../../../components/Layout/MainLayout';
 import { type Activity, ActivityStatus, Role } from '../../../types';
 import { useActivities, useCreateActivity, useUpdateActivity, useUpdateActivityStatus } from '../api/activities.hooks';
-import { Scan, Play, Lock, Loader2 } from 'lucide-react';
+import { Scan, Play, Lock, Loader2, Edit, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -20,18 +20,23 @@ export const AdminActivities: React.FC = () => {
     status: 'Upcoming'
   });
 
-  const { data: activities = [], isLoading: isFetching } = useActivities(true);
+  const { data: activities = [], isLoading: isFetching } = useActivities();
   const createActivityMutation = useCreateActivity();
   const updateActivityMutation = useUpdateActivity();
   const updateStatusMutation = useUpdateActivityStatus();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = {
+    const data: any = {
       ...form,
-      startDateTime: new Date(form.startDateTime).toISOString(),
-      endDateTime: new Date(form.endDateTime || form.startDateTime).toISOString()
+      startDateTime: new Date(form.startDateTime),
     };
+
+    if (form.endDateTime) {
+      data.endDateTime = new Date(form.endDateTime);
+    } else {
+      delete data.endDateTime;
+    }
 
     const mutation = editingAct ? updateActivityMutation : createActivityMutation;
     const mutationArgs = editingAct ? { id: editingAct.id, data } : data;
@@ -45,6 +50,27 @@ export const AdminActivities: React.FC = () => {
         toast.error(error.message || 'Action failed');
       }
     });
+  };
+
+  const handleEdit = (act: Activity) => {
+    const formatDateForInput = (dateStr: string) => {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      const tzOffset = date.getTimezoneOffset() * 60000;
+      const localISOTime = (new Date(date.getTime() - tzOffset)).toISOString().slice(0, 16);
+      return localISOTime;
+    };
+
+    setEditingAct(act);
+    setForm({
+      title: act.title,
+      description: act.description,
+      startDateTime: formatDateForInput(act.startDateTime),
+      endDateTime: act.endDateTime ? formatDateForInput(act.endDateTime) : '',
+      location: act.location,
+      status: act.status
+    });
+    setShowModal(true);
   };
 
   const handleStatusUpdate = async (activityId: string, status: string) => {
@@ -108,6 +134,18 @@ export const AdminActivities: React.FC = () => {
                   <Scan size={14} className="inline mr-1" /> Scan
                 </button>
               )}
+              <button
+                onClick={() => navigate(`/admin/activity/${act.id}`)}
+                className="flex-1 bg-blue-100 text-blue-600 py-2 rounded-xl text-xs font-bold uppercase hover:bg-blue-200 transition-all"
+              >
+                <Info size={14} className="inline mr-1" /> Details
+              </button>
+              <button
+                onClick={() => handleEdit(act)}
+                className="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl text-xs font-bold uppercase hover:bg-slate-200 transition-all"
+              >
+                <Edit size={14} className="inline mr-1" /> Edit
+              </button>
             </div>
           </div>
         ))}
@@ -115,7 +153,7 @@ export const AdminActivities: React.FC = () => {
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-[3rem] w-full max-w-xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h2 className="text-2xl font-black mb-6">Activity Entry</h2>
+            <h2 className="text-2xl font-black mb-6">{editingAct ? 'Edit Activity' : 'Activity Entry'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input placeholder="Title" required className="w-full p-4 border rounded-2xl" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
               <textarea placeholder="Description" className="w-full p-4 border rounded-2xl" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
@@ -125,7 +163,7 @@ export const AdminActivities: React.FC = () => {
                   <input type="datetime-local" required className="w-full p-4 border rounded-2xl" value={form.startDateTime} onChange={e => setForm({ ...form, startDateTime: e.target.value })} />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">End Date & Time</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">End Date & Time (Optional)</label>
                   <input type="datetime-local" className="w-full p-4 border rounded-2xl" value={form.endDateTime} onChange={e => setForm({ ...form, endDateTime: e.target.value })} />
                 </div>
               </div>

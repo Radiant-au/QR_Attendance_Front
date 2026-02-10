@@ -1,13 +1,12 @@
-
-import { type User, type CreateUserRequest, type UpdateUserRequest } from '../../../types';
+import { type User, type CreateUserRequest, type UpdateUserRequest, type OneUser } from '../../../types';
 import { apiFetch } from '../../../lib/apiClient';
 
 export const getUsers = async (): Promise<User[]> => {
   return apiFetch<User[]>('/user');
 };
 
-export const getUserById = async (id: string): Promise<User> => {
-  return apiFetch<User>(`/user/${id}`);
+export const getUserById = async (id: string): Promise<OneUser> => {
+  return apiFetch<OneUser>(`/user/${id}`);
 };
 
 export const createUser = async (data: CreateUserRequest): Promise<User> => {

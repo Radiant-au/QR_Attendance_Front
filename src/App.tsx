@@ -16,6 +16,8 @@ import { AdminDashboard } from './features/dashboard/components/AdminDashboard';
 import { AdminUsers } from './features/users/components/AdminUsers';
 import { AdminActivities } from './features/activities/components/AdminActivities';
 import { AdminScan } from './features/attendance/components/AdminScan';
+import { Profile } from './features/users/components/Profile';
+import { ActivityDetails } from './features/activities/components/ActivityDetails';
 
 const AuthGuard = ({ children, role }: { children?: ReactNode, role?: Role }) => {
   const userJson = localStorage.getItem(STORAGE_KEYS.USER);
@@ -47,7 +49,7 @@ const LoginPage = () => {
   useEffect(() => {
     if (user) {
       const isProfileCompleted = user.isProfileCompleted === true || user.isProfileCompleted === 'true';
-      const role = user.role?.toString().toUpperCase();
+      const role = user.role?.toString();
 
       if (role === Role.ADMIN) {
         navigate('/admin/dashboard', { replace: true });
@@ -98,9 +100,11 @@ const App: FC = () => {
           <Route path="/complete-profile" element={<ProfileCompletion />} />
           <Route path="/home" element={<AuthGuard role={Role.USER}><UserHome /></AuthGuard>} />
           <Route path="/qr" element={<AuthGuard role={Role.USER}><MyQR /></AuthGuard>} />
+          <Route path="/profile" element={<AuthGuard role={Role.USER}><Profile /></AuthGuard>} />
           <Route path="/admin/dashboard" element={<AuthGuard role={Role.ADMIN}><AdminDashboard /></AuthGuard>} />
           <Route path="/admin/users" element={<AuthGuard role={Role.ADMIN}><AdminUsers /></AuthGuard>} />
           <Route path="/admin/activities" element={<AuthGuard role={Role.ADMIN}><AdminActivities /></AuthGuard>} />
+          <Route path="/admin/activity/:activityId" element={<AuthGuard role={Role.ADMIN}><ActivityDetails /></AuthGuard>} />
           <Route path="/admin/scan" element={<AuthGuard role={Role.ADMIN}><AdminScan /></AuthGuard>} />
           <Route path="/admin/scan/:activityId" element={<AuthGuard role={Role.ADMIN}><AdminScan /></AuthGuard>} />
           <Route path="*" element={<Navigate to="/" replace />} />

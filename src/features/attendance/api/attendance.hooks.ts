@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { getQR } from './attendance';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getQR, markAttendance } from './attendance';
+import { type MarkAttendanceRequest } from '../../../types';
 
 export const useQR = (id: string) => {
     return useQuery({
@@ -7,5 +8,16 @@ export const useQR = (id: string) => {
         queryFn: () => getQR(id),
         enabled: !!id,
         staleTime: 1000 * 60 * 10, // 10 minutes
+    });
+};
+
+export const useMarkAttendance = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: MarkAttendanceRequest) => markAttendance(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['activities'] });
+        },
     });
 };
