@@ -70,10 +70,10 @@ export const ProfileCompletion: React.FC = () => {
               <select required className="w-full px-4 py-4 bg-slate-50 rounded-2xl outline-none" value={major} onChange={e => setMajor(e.target.value as Major)}>
                 <option value="">Select Major</option>
                 <option value="IS">IS (Information Science)</option>
-                <option value="CE">CE (Civil Engineering)</option>
+                <option value="CE">CE (Computer Engineering)</option>
                 <option value="EcE">EcE (Electronic Engineering)</option>
-                <option value="PrE">PrE (Probationary Engineering?)</option>
-                <option value="AME">AME (Aerospace Engineering?)</option>
+                <option value="PrE">PrE (Precision Engineering)</option>
+                <option value="AME">AME (Advanced Material Engineering)</option>
               </select>
             </div>
             <div>

@@ -134,7 +134,13 @@ export interface AttendanceRecord {
   notes: string;
 }
 
+
 export interface RegisterAttendanceResponseDTO {
   registration: ActivityRegistrationResponse[];
   attendance: AttendanceRecord[];
+}
+
+export interface LeaveRequest {
+  activityId: string;
+  notes: string;
 }

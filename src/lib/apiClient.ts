@@ -1,9 +1,14 @@
 const API_URL = "/api";
 
-type ApiFetchOptions = RequestInit & { skipAuth?: boolean };
+import { STORAGE_KEYS } from "../config";
+
+type ApiFetchOptions = RequestInit & {
+    skipAuth?: boolean;
+    skipUnauthorizedRedirect?: boolean;
+};
 
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
-    const { skipAuth, headers, ...rest } = options;
+    const { skipAuth, skipUnauthorizedRedirect, headers, ...rest } = options;
 
     const response = await fetch(`${API_URL}${path}`, {
         credentials: "include",
@@ -16,8 +21,16 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     });
 
     if (response.status === 401) {
-        window.location.href = "/";
-        return Promise.reject("Unauthorized");
+        if (!skipUnauthorizedRedirect) {
+            localStorage.removeItem(STORAGE_KEYS.USER);
+            localStorage.removeItem(STORAGE_KEYS.TOKEN);
+
+            if (window.location.pathname !== "/") {
+                window.location.href = "/";
+            }
+        }
+
+        throw new Error("Unauthorized");
     }
 
     const contentType = response.headers.get("content-type");

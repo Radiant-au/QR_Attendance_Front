@@ -11,3 +11,10 @@ export const markAttendance = async (data: MarkAttendanceRequest): Promise<Atten
     body: JSON.stringify(data),
   });
 };
+
+export const submitLeave = async (data: MarkAttendanceRequest | any): Promise<AttendanceResponse> => {
+  return apiFetch<AttendanceResponse>('/leave', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};

@@ -4,6 +4,7 @@ import { apiFetch } from '../../../lib/apiClient';
 export const loginUser = async (username: string, password: string): Promise<AuthResponse> => {
   return apiFetch<AuthResponse>('/auth/user', {
     method: 'POST',
+    skipUnauthorizedRedirect: true,
     body: JSON.stringify({ username, password }),
   });
 };
@@ -11,6 +12,7 @@ export const loginUser = async (username: string, password: string): Promise<Aut
 export const loginAdmin = async (username: string, password: string): Promise<AuthResponse> => {
   return apiFetch<AuthResponse>('/auth/admin', {
     method: 'POST',
+    skipUnauthorizedRedirect: true,
     body: JSON.stringify({ username, password }),
   });
 };

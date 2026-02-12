@@ -4,9 +4,11 @@ import { MainLayout } from '../../../components/Layout/MainLayout';
 import { Role, type User } from '../../../types';
 import { STORAGE_KEYS } from '../../../config';
 import { useQR } from '../api/attendance.hooks';
+import QRCode from 'qrcode';
 
 export const MyQR: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
+  const [qrImageUrl, setQrImageUrl] = useState('');
 
   const userJson = localStorage.getItem(STORAGE_KEYS.USER);
   const currentUser: User | null = userJson ? JSON.parse(userJson) : null;
@@ -34,7 +36,22 @@ export const MyQR: React.FC = () => {
 
     const updateTimer = () => {
       const now = Date.now();
-      const diff = Math.floor((expiresAt - now) / 1000);
+      let targetTime = expiresAt;
+
+      // Fix for timezone issue: if server sends time with significant offset (e.g. local time treated as UTC)
+      // and the difference is unreasonably large (> 1 hour), adjust by timezone offset
+      const diffRaw = targetTime - now;
+      if (diffRaw > 60 * 60 * 1000) {
+        // Myanmar is UTC+6:30, so offset is -390. We need to subtract the positive 6.5h if present.
+        const tzOffsetMs = new Date().getTimezoneOffset() * -1 * 60 * 1000;
+        // Check if removing offset brings it to a reasonable range (0-20 mins)
+        if (Math.abs((targetTime - tzOffsetMs) - now) < 20 * 60 * 1000) {
+          targetTime -= tzOffsetMs;
+        }
+      }
+
+      const diff = Math.floor((targetTime - now) / 1000);
+
       if (diff <= 0) {
         setTimeLeft(0);
         refreshQR();
@@ -58,9 +75,39 @@ export const MyQR: React.FC = () => {
     refetch();
   };
 
-  const qrImageUrl = qrToken
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrToken}`
-    : '';
+  useEffect(() => {
+    let isMounted = true;
+
+    const generateQrImage = async () => {
+      if (!qrToken) {
+        setQrImageUrl('');
+        return;
+      }
+
+      try {
+        const dataUrl = await QRCode.toDataURL(qrToken, {
+          width: 300,
+          margin: 1,
+          errorCorrectionLevel: 'M',
+        });
+
+        if (isMounted) {
+          setQrImageUrl(dataUrl);
+        }
+      } catch (e) {
+        console.error('Failed to generate local QR image:', e);
+        if (isMounted) {
+          setQrImageUrl('');
+        }
+      }
+    };
+
+    generateQrImage();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [qrToken]);
 
   return (
     <MainLayout role={Role.USER}>

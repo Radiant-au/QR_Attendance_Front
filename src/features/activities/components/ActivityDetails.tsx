@@ -140,50 +140,67 @@ export const ActivityDetails: React.FC = () => {
 
                 {typedData?.attendance && typedData.attendance.length > 0 ? (
                     <div className="space-y-3">
-                        {typedData.attendance.map((att) => (
-                            <div
-                                key={att.id}
-                                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${att.isPresent
-                                    ? 'border-green-200 bg-green-50/50 hover:border-green-300'
-                                    : 'border-red-200 bg-red-50/50 hover:border-red-300'
-                                    }`}
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div
-                                        className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold ${att.isPresent
-                                            ? 'bg-green-100 text-green-600'
-                                            : 'bg-red-100 text-red-600'
-                                            }`}
-                                    >
-                                        {att.isPresent ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+                        {typedData.attendance.map((att) => {
+                            const statusColors: Record<string, string> = {
+                                'registered': 'bg-blue-100 text-blue-700',
+                                'walk-in': 'bg-purple-100 text-purple-700',
+                                'leave': 'bg-amber-100 text-amber-700',
+                            };
+
+                            const statusLabel = att.attendanceType ? att.attendanceType.charAt(0).toUpperCase() + att.attendanceType.slice(1) : 'Unknown';
+
+                            return (
+                                <div
+                                    key={att.id}
+                                    className={`flex items-center justify-between p-4 rounded-xl border transition-all ${att.isPresent
+                                        ? 'border-green-200 bg-green-50/50 hover:border-green-300'
+                                        : 'border-red-200 bg-red-50/50 hover:border-red-300'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div
+                                            className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold ${att.isPresent
+                                                ? 'bg-green-100 text-green-600'
+                                                : 'bg-red-100 text-red-600'
+                                                }`}
+                                        >
+                                            {att.isPresent ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-slate-900">{att.userName}</p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${statusColors[att.attendanceType] || 'bg-slate-100 text-slate-600'}`}>
+                                                    {statusLabel}
+                                                </span>
+                                                {att.notes && (
+                                                    <span className="text-sm text-slate-500 italic flex items-center gap-1">
+                                                        • {att.notes}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-bold text-slate-900">{att.userName}</p>
-                                        <p className="text-sm text-slate-500">
-                                            {att.attendanceType} {att.notes && `• ${att.notes}`}
-                                        </p>
+                                    <div className="flex items-center gap-6 text-sm">
+                                        <div className="flex items-center gap-2 text-slate-600">
+                                            <GraduationCap size={16} />
+                                            <span>{att.major}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-slate-600">
+                                            <Calendar size={16} />
+                                            <span>{att.year}</span>
+                                        </div>
+                                        <div
+                                            className={`px-3 py-1 rounded-lg font-bold text-xs ${att.isPresent
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-red-100 text-red-700'
+                                                }`}
+                                        >
+                                            {att.isPresent ? 'Present' : 'Absent'}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-6 text-sm">
-                                    <div className="flex items-center gap-2 text-slate-600">
-                                        <GraduationCap size={16} />
-                                        <span>{att.major}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-slate-600">
-                                        <Calendar size={16} />
-                                        <span>{att.year}</span>
-                                    </div>
-                                    <div
-                                        className={`px-3 py-1 rounded-lg font-bold text-xs ${att.isPresent
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-red-100 text-red-700'
-                                            }`}
-                                    >
-                                        {att.isPresent ? 'Present' : 'Absent'}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 ) : (
                     <div className="text-center py-12">

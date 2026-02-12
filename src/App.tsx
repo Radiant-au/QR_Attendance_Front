@@ -5,7 +5,6 @@ import { ShieldCheck } from 'lucide-react';
 
 
 import { Role, type User } from './types';
-import { STORAGE_KEYS } from './config';
 
 // Features
 import { LoginForm } from './features/auth/components/LoginForm';
@@ -87,6 +86,7 @@ const LoginPage = () => {
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
+import { STORAGE_KEYS } from './config';
 
 const queryClient = new QueryClient();
 
