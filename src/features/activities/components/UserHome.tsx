@@ -3,7 +3,7 @@ import { MainLayout } from '../../../components/Layout/MainLayout';
 import ActivityCard from './ActivityCard';
 import { useActivities, useRegisterActivity } from '../api/activities.hooks';
 import { useSubmitLeave } from '../../attendance/api/attendance.hooks';
-import { Role } from '../../../types';
+import { Role, type OneUser } from '../../../types';
 import { toast } from 'sonner';
 
 import { useMe } from '../../auth/api/auth.hooks';
@@ -15,7 +15,7 @@ export const UserHome: React.FC = () => {
 
   // Get current user details from cache
   const { data: authData } = useMe();
-  const user = authData?.user;
+  const user = authData?.user as OneUser | undefined;
 
   const handleRegister = async (activityId: string) => {
     if (!user?.id) {
@@ -27,7 +27,7 @@ export const UserHome: React.FC = () => {
       onSuccess: () => {
         toast.success('Registered successfully! See you there.');
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         toast.error(error.message || 'Registration failed');
       }
     });
@@ -38,7 +38,7 @@ export const UserHome: React.FC = () => {
       onSuccess: () => {
         toast.success('Leave request submitted.');
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         toast.error(error.message || 'Failed to submit leave request');
       }
     });
@@ -59,7 +59,7 @@ export const UserHome: React.FC = () => {
           {activities.map(act => {
             // Check if user is registered using the fetched user data
             // If user data isn't loaded yet, default to false or the activity's property
-            const registrations = (user as any)?.registrations || [];
+            const registrations = user?.registrations || [];
             const isRegistered = registrations.includes(act.id) || false;
 
             return (

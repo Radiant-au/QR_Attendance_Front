@@ -1,5 +1,5 @@
 
-import { type Activity, type CreateActivityRequest } from '../../../types';
+import { type Activity, type AttendanceRecord, type CreateActivityRequest } from '../../../types';
 import { apiFetch } from '../../../lib/apiClient';
 
 export const getActivities = async (): Promise<Activity[]> => {
@@ -40,20 +40,20 @@ export const updateStatus = async (activityId: string, status: string): Promise<
   });
 };
 
-export const registerForActivity = async (userId: string, activityId: string): Promise<any> => {
-  return apiFetch<any>('/activity-registration', {
+export const registerForActivity = async (userId: string, activityId: string): Promise<{ success: boolean }> => {
+  return apiFetch<{ success: boolean }>('/activity-registration', {
     method: 'POST',
     body: JSON.stringify({ userId, activityId }),
   });
 };
 
-export const submitLeaveRequest = async (activityId: string, cancellationReason: string): Promise<any> => {
-  return apiFetch<any>('/activity-registration/cancel', {
+export const submitLeaveRequest = async (activityId: string, cancellationReason: string): Promise<{ success: boolean }> => {
+  return apiFetch<{ success: boolean }>('/activity-registration/cancel', {
     method: 'PUT',
     body: JSON.stringify({ activityId, cancellationReason }),
   });
 };
 
-export const getActivityAttendance = async (activityId: string): Promise<any> => {
-  return apiFetch<any>(`/activity/${activityId}/attendance`);
+export const getActivityAttendance = async (activityId: string): Promise<AttendanceRecord[]> => {
+  return apiFetch<AttendanceRecord[]>(`/activity/${activityId}/attendance`);
 };

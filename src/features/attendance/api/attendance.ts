@@ -1,5 +1,5 @@
 import { apiFetch } from "../../../lib/apiClient";
-import { type AttendanceResponse, type MarkAttendanceRequest } from "../../../types";
+import { type AttendanceResponse, type MarkAttendanceRequest, type LeaveRequest } from "../../../types";
 
 export const getQR = async (id: string): Promise<string> => {
   return apiFetch<string>(`/user/getQR/${id}`);
@@ -12,7 +12,7 @@ export const markAttendance = async (data: MarkAttendanceRequest): Promise<Atten
   });
 };
 
-export const submitLeave = async (data: MarkAttendanceRequest | any): Promise<AttendanceResponse> => {
+export const submitLeave = async (data: LeaveRequest): Promise<AttendanceResponse> => {
   return apiFetch<AttendanceResponse>('/leave', {
     method: 'POST',
     body: JSON.stringify(data),

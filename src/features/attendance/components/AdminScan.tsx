@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { useActivity } from '../../activities/api/activities.hooks';
@@ -25,6 +25,66 @@ export const AdminScan = () => {
   const isProcessingRef = useRef(false);
 
   const readerElementId = 'qr-reader';
+
+  const onScanSuccess = useCallback((decodedText: string) => {
+    if (!activityId) {
+      toast.error('No activity selected');
+      return;
+    }
+
+    // 🚫 Prevent duplicate processing
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+
+    // Pause scanning while processing
+    scannerRef.current?.pause();
+
+    markAttendanceMutation.mutate(
+      {
+        activityId,
+        qrToken: decodedText,
+        scanMethod: 'QR_SCAN',
+      },
+      {
+        onSuccess: (response) => {
+          setLastScanned({
+            name: response.userName,
+            type: response.attendanceType,
+            time: new Date().toLocaleTimeString(),
+            success: true,
+          });
+
+          toast.success(
+            `${response.userName} marked as ${response.attendanceType}`
+          );
+        },
+        onError: (error: Error) => {
+          setLastScanned({
+            name: 'Error',
+            type: error.message || 'Failed to mark attendance',
+            time: new Date().toLocaleTimeString(),
+            success: false,
+          });
+
+          toast.error(error.message || 'Failed to mark attendance');
+        },
+        onSettled: () => {
+          // ⏳ Cooldown before allowing next scan
+          setTimeout(() => {
+            scannerRef.current?.resume();
+            isProcessingRef.current = false;
+            setLastScanned(null);
+          }, 1500);
+        },
+      }
+    );
+  }, [activityId, markAttendanceMutation]);
+
+  const onScanError = useCallback((errorMessage: string) => {
+    if (!errorMessage.includes('NotFoundException')) {
+      console.error('QR Scan Error:', errorMessage);
+    }
+  }, []);
 
   useEffect(() => {
     const startScanner = async () => {
@@ -61,67 +121,7 @@ export const AdminScan = () => {
         scannerRef.current.stop().catch(console.error);
       }
     };
-  }, []);
-
-  const onScanSuccess = (decodedText: string) => {
-    if (!activityId) {
-      toast.error('No activity selected');
-      return;
-    }
-
-    // 🚫 Prevent duplicate processing
-    if (isProcessingRef.current) return;
-    isProcessingRef.current = true;
-
-    // Pause scanning while processing
-    scannerRef.current?.pause();
-
-    markAttendanceMutation.mutate(
-      {
-        activityId,
-        qrToken: decodedText,
-        scanMethod: 'QR_SCAN',
-      },
-      {
-        onSuccess: (response) => {
-          setLastScanned({
-            name: response.userName,
-            type: response.attendanceType,
-            time: new Date().toLocaleTimeString(),
-            success: true,
-          });
-
-          toast.success(
-            `${response.userName} marked as ${response.attendanceType}`
-          );
-        },
-        onError: (error: any) => {
-          setLastScanned({
-            name: 'Error',
-            type: error.message || 'Failed to mark attendance',
-            time: new Date().toLocaleTimeString(),
-            success: false,
-          });
-
-          toast.error(error.message || 'Failed to mark attendance');
-        },
-        onSettled: () => {
-          // ⏳ Cooldown before allowing next scan
-          setTimeout(() => {
-            scannerRef.current?.resume();
-            isProcessingRef.current = false;
-            setLastScanned(null);
-          }, 1500);
-        },
-      }
-    );
-  };
-
-  const onScanError = (errorMessage: string) => {
-    if (!errorMessage.includes('NotFoundException')) {
-      console.error('QR Scan Error:', errorMessage);
-    }
-  };
+  }, [onScanError, onScanSuccess]);
 
   return (
     <div className="fixed inset-0 bg-slate-900 z-[100] flex flex-col text-white">

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { MainLayout } from '../../../components/Layout/MainLayout';
-import { type Activity, ActivityStatus, Role } from '../../../types';
+import { type Activity, type CreateActivityRequest, ActivityStatus, Role } from '../../../types';
 import { useActivities, useCreateActivity, useUpdateActivity, useUpdateActivityStatus, useDeleteActivity } from '../api/activities.hooks';
 import { Scan, Loader2, Edit, Info, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -50,7 +50,7 @@ export const AdminActivities: React.FC = () => {
         onSuccess: () => {
           toast.success('Activity deleted successfully');
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
           toast.error(error.message || 'Failed to delete activity');
         }
       });
@@ -59,26 +59,27 @@ export const AdminActivities: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data: any = {
-      ...form,
+    const data: CreateActivityRequest = {
+      title: form.title,
+      description: form.description,
       startDateTime: new Date(form.startDateTime),
+      location: form.location,
+      status: form.status
     };
 
     if (form.endDateTime) {
       data.endDateTime = new Date(form.endDateTime);
-    } else {
-      delete data.endDateTime;
     }
 
     const mutation = editingAct ? updateActivityMutation : createActivityMutation;
     const mutationArgs = editingAct ? { id: editingAct.id, data } : data;
 
-    (mutation as any).mutate(mutationArgs, {
+    mutation.mutate(mutationArgs as any, {
       onSuccess: () => {
         toast.success(`Activity ${editingAct ? 'updated' : 'created'} successfully!`);
         setShowModal(false);
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         toast.error(error.message || 'Action failed');
       }
     });
@@ -110,7 +111,7 @@ export const AdminActivities: React.FC = () => {
       onSuccess: () => {
         toast.success(`Status updated to ${status}`);
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         toast.error(error.message || 'Failed to update status');
       }
     });

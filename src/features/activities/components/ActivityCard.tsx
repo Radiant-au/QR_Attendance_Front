@@ -37,11 +37,16 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     }
   };
 
-  const isOngoing = activity.status === ActivityStatus.ONGOING || activity.status === 'Ongoing';
-  const isClosed = activity.status === ActivityStatus.REGISTRATION_CLOSED || activity.status === 'Registration Closed';
-  const canRegister = activity.status === ActivityStatus.UPCOMING || activity.status === 'Upcoming';
+  const isCompleted = activity.status === ActivityStatus.COMPLETED || activity.status === 'Completed';
+  const normalizedStatus = String(activity.status || '').toLowerCase();
+  const isOngoing = normalizedStatus === ActivityStatus.ONGOING;
+  const isClosed =
+    normalizedStatus === ActivityStatus.REGISTRATION_CLOSED ||
+    normalizedStatus === 'registration closed' ||
+    normalizedStatus === 'closed';
+  const canRegister = normalizedStatus === ActivityStatus.UPCOMING;
 
-  const canSubmitLeave = (isClosed || isOngoing) && !leaveRequested;
+  const canSubmitLeave = isRegistered && !isCompleted && !leaveRequested;
 
   const formatDate = (dateStr: string) => {
     try {
